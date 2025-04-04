@@ -4,6 +4,8 @@ from src.config.config import Config
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+# for password hashing
+from flask_bcrypt import Bcrypt
 
 # loading environment variables
 load_dotenv()
@@ -30,4 +32,4 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # import models to let the migrate tool know
-# from src.models.user_model import User
+from src.models.user_model import User
