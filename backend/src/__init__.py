@@ -32,4 +32,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # import models to let the migrate tool know
-from src.models.user_model import User
+from src.models.user import User
+from src.models.transaction import Transaction
+from backend.src.models.account import Account
+from backend.src.models.budget import Budget
+from backend.src.models.budgetCycle import BudgetCycle
+from backend.src.models.category import Category

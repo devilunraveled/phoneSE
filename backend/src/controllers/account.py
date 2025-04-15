@@ -1,6 +1,6 @@
 from src import db
 
-from src.models.accountModel import Account
+from backend.src.models.account import Account
 
 from src.controllers.user import checkIfUserExists
 
@@ -15,6 +15,7 @@ def createAccount( userID, name, *args, **kwargs ):
         return False # Possibly raise an exception here.
 
     # Create account
+    # ! add try catch here
     newAccount = Account( userID = userID, name = name )
     db.session.add( newAccount )
     db.session.commit()

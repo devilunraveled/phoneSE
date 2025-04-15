@@ -1,5 +1,5 @@
 from flask import request, Response, json, Blueprint
-from src.models.user_model import User
+from src.models.user import User
 from src import bcrypt, db
 from datetime import datetime
 import jwt

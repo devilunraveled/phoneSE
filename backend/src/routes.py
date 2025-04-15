@@ -1,5 +1,5 @@
 from flask import Blueprint
-from src.controllers.user_controller import user_bp
+from src.controllers.user import user_bp
 
 # main blueprint to be registered with application
 api = Blueprint('api', __name__)
