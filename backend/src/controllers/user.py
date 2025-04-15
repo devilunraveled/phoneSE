@@ -8,6 +8,13 @@ import os
 # creating a blueprint for user routes
 user_bp = Blueprint('user', __name__)
 
+#HEAD
+def checkIfUserExists(userId):
+    user = User.query.filter_by(id=userId).first()
+    if not user:
+        return False
+    return True
+
 # user registration route
 @user_bp.route('/register', methods=['POST'])
 def register_user():
