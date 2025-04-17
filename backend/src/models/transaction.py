@@ -1,4 +1,14 @@
+from sqlalchemy import Table, Column
+
 from src import db
+
+# transactionCategoryAssociation = Table(
+#     'transactionCategoryAssociation',
+#     db.Model.metadata,
+#     Column('transactionId', db.Integer, db.ForeignKey('transactions.id')),
+#     Column('categoryId', db.Integer, db.ForeignKey('categories.id')),
+#     keep_existing=True
+# )
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
@@ -14,8 +24,9 @@ class Transaction(db.Model):
     name = db.Column(db.String(40), nullable=True)
     description = db.Column(db.String(100), nullable=True)
     timestamp = db.Column(db.DateTime, nullable=True)
-    category = db.Relationship('Category', backref='transactions')
-    budget = db.Relationship('Budget', backref='transactions')
+
+    # Relationships
+    # categories = db.relationship('Categories', secondary=transactionCategoryAssociation)
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)

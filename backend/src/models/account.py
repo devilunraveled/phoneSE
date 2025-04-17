@@ -18,5 +18,5 @@ class Account(db.Model):
     currency = db.Column(db.Enum(*CURRENCY_LIST), nullable=False, default=CURRENCY_LIST[0])
     
     # Nullable Fields
-    budget = db.Relationship('Budget', backref='account')
+    budget = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=True)
     description = db.Column(db.String(100), nullable=True)

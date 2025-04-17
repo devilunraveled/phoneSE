@@ -10,13 +10,12 @@ class Budget(db.Model):
     creationDate = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    accounts = db.Relationship('Account', backref='budget')
-    categories = db.Relationship('Category', backref='budget')
-
     # Nullable Fields
-    budgetCycles = db.Relationship('BudgetCycle', backref='budget')
     duration = db.Column(db.String(40), nullable=True)
 
+    # Relationships
+    budgetCycles = db.relationship('BudgetCycle', back_populates='parentBudget')
+    
     def getDuration(self):
         if self.duration is None:
             return "15"

@@ -31,7 +31,7 @@ def getTransaction(id: int):
 				  		status=200,
 						mimetype='application/json')	
 	except Exception as e:
-		return Response(json.dumps({"message": "Internal server error"}), status=500, mimetype='application/json')
+		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
 # PUT
 @transactionBp.route('/update/<int:id>', methods=['PUT'])
