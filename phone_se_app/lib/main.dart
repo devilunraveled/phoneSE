@@ -146,7 +146,7 @@ class QRScanScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Scan QR Code')),
       body: MobileScanner(
-        onDetect: (barcode, args) {
+        onDetect: (barcode) {
           Navigator.pop(context);
         },
       ),
