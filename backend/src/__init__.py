@@ -28,6 +28,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.environ.get("SQLALCHEMY_TRACK_
 # sql alchemy instance
 db = SQLAlchemy(app)
 
+# bcrypt instance for password hashing
+bcrypt = Bcrypt(app)
+
 # Flask Migrate instance to handle migrations
 migrate = Migrate(app, db)
 
