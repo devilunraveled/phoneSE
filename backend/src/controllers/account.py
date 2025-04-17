@@ -1,6 +1,6 @@
 from src import db
 
-from backend.src.models.account import Account
+from src.models.account import Account
 
 from src.controllers.user import checkIfUserExists
 

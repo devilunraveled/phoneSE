@@ -1,6 +1,6 @@
 from flask import request, Response, json, Blueprint
 
-from backend.src.models.transaction import Transaction
+from src.models.transaction import Transaction
 
 transactionBp = Blueprint('transaction', __name__)
 

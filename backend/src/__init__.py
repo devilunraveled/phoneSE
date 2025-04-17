@@ -34,7 +34,7 @@ migrate = Migrate(app, db)
 # import models to let the migrate tool know
 from src.models.user import User
 from src.models.transaction import Transaction
-from backend.src.models.account import Account
-from backend.src.models.budget import Budget
-from backend.src.models.budgetCycle import BudgetCycle
-from backend.src.models.category import Category
+from src.models.account import Account
+from src.models.budget import Budget
+from src.models.budgetCycle import BudgetCycle
+from src.models.category import Category
