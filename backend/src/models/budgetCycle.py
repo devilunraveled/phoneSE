@@ -2,13 +2,13 @@ from sqlalchemy import Table, Column
 
 from src import db
 
-# transactionBudgetCycleAssociation = Table(
-#     'transactionBudgetCycleAssociation',
-#     db.Model.metadata,
-#     Column('budgetCycleId', db.Integer, db.ForeignKey('budgetCycles.id')),
-#     Column('transactionId', db.Integer, db.ForeignKey('transactions.id')),
-#     keep_existing=True
-# )
+transactionBudgetCycleAssociation = Table(
+    'transactionBudgetCycleAssociation',
+    db.Model.metadata,
+    Column('budgetCycleId', db.Integer, db.ForeignKey('budgetCycles.id')),
+    Column('transactionId', db.Integer, db.ForeignKey('transactions.id')),
+    keep_existing=True
+)
 
 class BudgetCycle(db.Model):
     __tablename__ = 'budgetCycles'
@@ -25,4 +25,4 @@ class BudgetCycle(db.Model):
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
     parentBudget = db.relationship('Budget', back_populates='budgetCycles')
 
-    # transactions = db.relationship('BudgetCycles', secondary=transactionBudgetCycleAssociation)
+    transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)

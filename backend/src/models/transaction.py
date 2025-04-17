@@ -2,13 +2,13 @@ from sqlalchemy import Table, Column
 
 from src import db
 
-# transactionCategoryAssociation = Table(
-#     'transactionCategoryAssociation',
-#     db.Model.metadata,
-#     Column('transactionId', db.Integer, db.ForeignKey('transactions.id')),
-#     Column('categoryId', db.Integer, db.ForeignKey('categories.id')),
-#     keep_existing=True
-# )
+transactionCategoryAssociation = Table(
+    'transactionCategoryAssociation',
+    db.Model.metadata,
+    Column('transactionId', db.Integer, db.ForeignKey('transactions.id')),
+    Column('categoryId', db.Integer, db.ForeignKey('categories.id')),
+    keep_existing=True
+)
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
@@ -26,7 +26,7 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    # categories = db.relationship('Categories', secondary=transactionCategoryAssociation)
+    categories = db.relationship('Category', secondary=transactionCategoryAssociation)
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)
