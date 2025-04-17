@@ -38,3 +38,7 @@ from src.models.account import Account
 from src.models.budget import Budget
 from src.models.budgetCycle import BudgetCycle
 from src.models.category import Category
+
+# register the api blueprint with the application
+from src.routes import api
+app.register_blueprint(api, url_prefix='/api')

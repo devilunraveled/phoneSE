@@ -1,12 +1,12 @@
 from flask import request, Response, json, Blueprint
 from src.models.user import User
-from src import bcrypt, db
+from src import Bcrypt, db
 from datetime import datetime
 import jwt
 import os
 
 # creating a blueprint for user routes
-user_bp = Blueprint('user', __name__)
+userBp = Blueprint('user', __name__)
 
 #HEAD
 def checkIfUserExists(userId):
@@ -16,7 +16,7 @@ def checkIfUserExists(userId):
     return True
 
 # user registration route
-@user_bp.route('/register', methods=['POST'])
+@userBp.route('/register', methods=['POST'])
 def register_user():
     try :
         data = request.get_json()
@@ -38,7 +38,7 @@ def register_user():
             return Response(json.dumps({"message": "User already exists"}), status=400, mimetype='application/json')
 
         # hash the password
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        hashed_password = Bcrypt.generate_password_hash(password).decode('utf-8')
 
         # create a new user
         new_user = User(
@@ -71,7 +71,7 @@ def register_user():
         return Response(json.dumps({"message": "An error occurred", "error": str(e)}), status=500, mimetype='application/json')
     
 # user login route
-@user_bp.route('/login', methods=['POST'])
+@userBp.route('/login', methods=['POST'])
 def login_user():
     try:
         data = request.get_json()
@@ -90,7 +90,7 @@ def login_user():
             return Response(json.dumps({"message": "User does not exist"}), status=404, mimetype='application/json')
 
         # check if password is correct
-        if not bcrypt.check_password_hash(user.password_hash, password):
+        if not Bcrypt.check_password_hash(user.password_hash, password):
             return Response(json.dumps({"message": "Invalid password"}), status=401, mimetype='application/json')
 
         # generate JWT token
