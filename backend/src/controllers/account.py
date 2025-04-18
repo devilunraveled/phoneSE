@@ -5,6 +5,19 @@ from src.models.transaction import Transaction
 from src.controllers.user import checkIfUserExists
 from src import PhoneSELogger
 
+def isValidAccount(accountId):
+    try:
+        account = getAccount(accountId)
+
+        if account is None:
+            PhoneSELogger.error("Account validation failed: Account does not exist")
+            return False
+
+        return True
+    except Exception as e:
+        PhoneSELogger.error("Account validation failed: " + str(e))
+        return False
+
 # GET
 def getAccount( accountId ) -> Optional[Account]:
     try :

@@ -1,116 +1,80 @@
-from flask import request, Response, json, Blueprint
-from src.models.user import User
-from src import bcrypt, db
-from datetime import datetime, timezone, timedelta
 import jwt
 import os
+from datetime import datetime, timezone, timedelta
+from typing import Optional
 
-# creating a blueprint for user routes
-userBp = Blueprint('user', __name__)
+from src import bcrypt, db, PhoneSELogger
+from src.models import User
 
-#HEAD
 def checkIfUserExists(userId):
     user = User.query.filter_by(id=userId).first()
     if not user:
         return False
     return True
 
-# user registration route
-@userBp.route('/register', methods=['POST'])
-def register_user():
-    try :
-        data = request.get_json()
-        if not data:
-            return Response(json.dumps({"message": "No input data provided"}), status=400, mimetype='application/json')
-
-        firstname = data.get('firstname')
-        lastname = data.get('lastname')
-        calling_code = data.get('calling_code')
-        phone_number = data.get('phone_number')
+def createUser(data) -> Optional[User]:
+    try:
+        firstName = data.get('firstName')
+        lastName = data.get('lastName')
+        callingCode = data.get('callingCode')
+        phoneNumber = data.get('phoneNumber')
         password = data.get('password')
 
-        if not phone_number or not calling_code:
-            return Response(json.dumps({"message": "Missing required fields"}), status=400, mimetype='application/json')
+        if not phoneNumber or not callingCode:
+            PhoneSELogger.error("Phone number or calling code not provided")
+            return None
 
         # check if user already exists
-        existing_user = User.query.filter_by(phone_number=phone_number).first()
+        existing_user = User.query.filter_by(phoneNumber=phoneNumber).first()
         if existing_user:
-            return Response(json.dumps({"message": "User already exists"}), status=400, mimetype='application/json')
+            PhoneSELogger.error(f"User with phone number {phoneNumber} already exists")
+            return None
 
         # hash the password
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
 
         # create a new user
-        new_user = User(
-            firstname=firstname,
-            lastname=lastname,
-            calling_code=calling_code,
-            phone_number=phone_number,
-            password_hash=hashed_password
+        newUser = User(
+            firstName=firstName,
+            lastName=lastName,
+            callingCode=callingCode,
+            phoneNumber=phoneNumber,
+            passwordHash=hashedPassword
         )
-        db.session.add(new_user)
 
-        payload = {
-            'iat': datetime.now(timezone.utc),
-            'user_id': str(new_user.id),
-            'firstname': new_user.firstname,
-            'lastname': new_user.lastname,
-            'phone_number': new_user.phone_number,
-            'exp': datetime.now(timezone.utc) + timedelta(days=1)
-        }
-        token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
-
-        response = json.dumps({
-            "message": "User registered successfully",
-            "token": token,
-        })
-
-        db.session.commit()
-
-        return Response(response, status=201, mimetype='application/json')
+        return newUser
     except Exception as e:
-        db.session.rollback()
-        return Response(json.dumps({"message": "An error occurred", "error": str(e)}), status=500, mimetype='application/json')
+        PhoneSELogger.error(f"Failed to create user: {e}")
+        return None
+
+def validateUser(data) -> Optional[User]:
+    phoneNumber = data.get('phoneNumber')
+    password = data.get('password')
+
+    if not phoneNumber or not password:
+        PhoneSELogger.error("Phone number or password not provided")
+        raise Exception("Phone number or password not provided")
     
-# user login route
-@userBp.route('/login', methods=['POST'])
-def login_user():
-    try:
-        data = request.get_json()
-        if not data:
-            return Response(json.dumps({"message": "No input data provided"}), status=400, mimetype='application/json')
+    # check if user exists
+    user = User.query.filter_by(phoneNumber=phoneNumber).first()
+    if not user:
+        PhoneSELogger.error(f"User with phone number {phoneNumber} does not exist")
+        raise Exception("User does not exist")
 
-        phone_number = data.get('phone_number')
-        password = data.get('password')
+    # check if password is correct
+    if not bcrypt.check_password_hash(user.password_hash, password):
+        raise Exception("Invalid password")
 
-        if not phone_number or not password:
-            return Response(json.dumps({"message": "Missing required fields"}), status=400, mimetype='application/json')
+    return user
 
-        # check if user exists
-        user = User.query.filter_by(phone_number=phone_number).first()
-        if not user:
-            return Response(json.dumps({"message": "User does not exist"}), status=404, mimetype='application/json')
-
-        # check if password is correct
-        if not bcrypt.check_password_hash(user.password_hash, password):
-            return Response(json.dumps({"message": "Invalid password"}), status=401, mimetype='application/json')
-
-        # generate JWT token
-        payload = {
-            'iat': datetime.now(timezone.utc),
-            'user_id': str(user.id),
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'phone_number': user.phone_number,
-            'exp': datetime.now(timezone.utc) + timedelta(days=1)
-        }
-        token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
-
-        response = json.dumps({
-            "message": "Login successful",
-            "token": token,
-        })
-
-        return Response(response, status=200, mimetype='application/json')
-    except Exception as e:
-        return Response(json.dumps({"message": "An error occurred", "error": str(e)}), status=500, mimetype='application/json')
+def generateJwtToken(user: User):
+    payload = {
+        'iat': datetime.now(timezone.utc),
+        'user_id': str(user.id),
+        'firstName': user.firstName,
+        'lastName': user.lastName,
+        'phoneNumber': user.phoneNumber,
+        'exp': datetime.now(timezone.utc) + timedelta(days=1)
+    }
+    token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
+    return token

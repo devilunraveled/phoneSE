@@ -4,6 +4,7 @@ from typing import List, Optional
 from src import PhoneSELogger
 from src.models import Transaction
 from .category import getCategories
+from .account import isValidAccount
 
 # POST
 def createTransaction(data) -> Optional[Transaction]:
@@ -19,6 +20,10 @@ def createTransaction(data) -> Optional[Transaction]:
 			PhoneSELogger.error(f"Failed to get categories: {e}")
 			return None
 		
+		if not isValidAccount(data['payee']) or not isValidAccount(data['payer']):
+			PhoneSELogger.error("Invalid payee or payer account")
+			return None
+
 		transaction = Transaction(
 			amount = data['amount'],
 			currency = data['currency'],

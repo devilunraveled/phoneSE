@@ -26,6 +26,7 @@ def createCategory(data) -> Optional[Category]:
 			name = data['name'],
 			description = data['description'],
 			budgetId = data['budgetId'] if 'budgetId' in data else None,
+			userId = data['userId']
 		)
 
 		return category
