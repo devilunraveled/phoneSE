@@ -1,12 +1,9 @@
-from flask import request, Response, json, Blueprint
-from datetime import datetime
+from typing import Optional, List
 
-from src import db
-from src.models.category import Category
+from src import PhoneSELogger
+from src.models import Category
 
-categoryBp = Blueprint('category', __name__)
-
-def getCategories(categoryIds: list[int]):
+def getCategories(categoryIds: List[int]) -> Optional[List[Category]]:
 	if len(categoryIds) == 0:
 		return []
 
@@ -23,23 +20,15 @@ def getCategories(categoryIds: list[int]):
 	except Exception as e:
 		raise e
 
-@categoryBp.route('/create', methods=['POST'])
-def createCategory():
+def createCategory(data) -> Optional[Category]:
 	try:
-		data = request.get_json()
-
-		if not data:
-			return Response(json.dumps({"message": "Input data not provided or invalid"}), status=400, mimetype='application/json')
-		
 		category = Category(
 			name = data['name'],
 			description = data['description'],
 			budgetId = data['budgetId'] if 'budgetId' in data else None,
 		)
 
-		db.session.add(category)
-		db.session.commit()
-
-		return Response(json.dumps({"message": "Category created successfully"}), status=200, mimetype='application/json')
+		return category
 	except Exception as e:
-		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+		PhoneSELogger.error(f"Failed to create category object: {e}")
+		return None
