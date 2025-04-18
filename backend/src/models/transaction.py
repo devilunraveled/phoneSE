@@ -1,6 +1,10 @@
 from sqlalchemy import Table, Column
+from sqlalchemy.orm import registry
+from dataclasses import dataclass
 
 from src import db
+
+reg = registry()
 
 transactionCategoryAssociation = Table(
     'transactionCategoryAssociation',
@@ -30,3 +34,6 @@ class Transaction(db.Model):
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

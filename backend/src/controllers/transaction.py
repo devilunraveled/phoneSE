@@ -1,5 +1,7 @@
 from flask import request, Response, json, Blueprint
+from datetime import datetime
 
+from src import db
 from src.models.transaction import Transaction
 
 transactionBp = Blueprint('transaction', __name__)
@@ -14,7 +16,34 @@ def createTransaction():
 	4. If this was unsuccessful, return error. 
 	   Otherwise, commit transaction to database and return success.
 	"""
-	pass
+	try:
+		id = request.json['id']
+		amount = request.json['amount']
+		currency = request.json['currency']
+		payee = request.json['payee']
+		payer = request.json['payer']
+		name = request.json['name']
+		description = request.json['description']
+		categories = request.json['categories']
+
+		transaction = Transaction(
+			id=id,
+			amount=amount,
+			currency=currency,
+			payee=payee,
+			payer=payer,
+			name=name,
+			description=description,
+			timestamp=datetime.now(),
+			# categories=categories
+		)
+
+		db.session.add(transaction)
+		db.session.commit()
+
+		return Response(json.dumps({"message": "Transaction created successfully"}), status=201, mimetype='application/json')
+	except Exception as e:
+		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
 # GET
 @transactionBp.route('/get/<int:id>', methods=['GET'])
@@ -26,10 +55,21 @@ def getTransaction(id: int):
 				   			status=404,
 							mimetype='application/json')
 		
+		response = {
+			"id": transaction.id,
+			"amount": transaction.amount,
+			"currency": transaction.currency,
+			"payee": transaction.payee,
+			"payer": transaction.payer,
+			"name": transaction.name,
+			"description": transaction.description,
+			"timestamp": str(transaction.timestamp)
+		}
 		# ? how to jsonify db.Model object
-		return Response(json.jsonify(transaction),
+		return Response(str(response),
 				  		status=200,
-						mimetype='application/json')	
+						mimetype='application/json')
+
 	except Exception as e:
 		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
