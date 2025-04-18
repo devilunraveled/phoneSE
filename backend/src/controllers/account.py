@@ -1,9 +1,18 @@
 from typing import Optional
+
+from src import PhoneSELogger
+
 from src.models.account import Account
 from src.models.transaction import Transaction
 
 from src.controllers.user import checkIfUserExists
-from src import PhoneSELogger
+
+#HEAD
+def checkIfAccountExists(accountId):
+    account = Account.query.get(accountId)
+    if not account:
+        return False
+    return True
 
 def isValidAccount(accountId):
     try:
@@ -29,6 +38,10 @@ def getAccount( accountId ) -> Optional[Account]:
         return None
 
 def getAccountBalance( accountId ) -> Optional[float]:
+    """
+        Fetches the balance of the account
+        @param accountId: ID of the account
+    """
     try :
         account = getAccount( accountId )
 
@@ -43,6 +56,10 @@ def getAccountBalance( accountId ) -> Optional[float]:
         return None
 
 def getAccountDetails( accountId ):
+    """
+        Fetches the details of the account
+        @param accountId: ID of the account
+    """
     try :
         account = getAccount( accountId )
 
@@ -57,6 +74,10 @@ def getAccountDetails( accountId ):
         return None
 
 def getAccountTransactions( accountId ) -> Optional[list[Transaction]]:
+    """
+        Fetches the transactions of the account
+        @param accountId: ID of the account
+    """
     try :
         PhoneSELogger.info( "Fetching account transactions" )
         query = Transaction.payer == accountId or Transaction.payee == accountId
@@ -72,7 +93,11 @@ def getAccountTransactions( accountId ) -> Optional[list[Transaction]]:
         PhoneSELogger.error( "Account transactions fetch failed: " + str(e) )
         return None
 
-def getAccountBudget( accountId ): # TO Discuss
+def getAccountBudget( accountId ):
+    """
+        Fetches the budget of the account
+        @param accountId: ID of the account
+    """
     try :
         PhoneSELogger.info( "Fetching account budgets" )
         account = getAccount( accountId )
@@ -96,6 +121,8 @@ def getAccountBudget( accountId ): # TO Discuss
 def createAccount( userId, name, *args, **kwargs ):
     """
         Creates a new account for the user
+        @param userId: ID of the user
+        @kwargs: Dictionary of attributes and values
     """
     
     # Check if user exists
@@ -116,7 +143,7 @@ def createAccount( userId, name, *args, **kwargs ):
 def updateDetails( accountID, **kwargs ):
     """
         Create the details for an account :
-        name, description.
+        @kwargs: Dictionary of attributes and values
     """
     try :
         account = getAccount( accountID )
@@ -141,6 +168,9 @@ def updateDetails( accountID, **kwargs ):
 def setAccountBalance( accountId, balance, currency = None):
     """
         Set the balance for an account
+        @param accountId: ID of the account
+        @param balance: Amount to be set ( can be negative )
+        @param currency: Currency to be set ( Overrides the existing currency if different )
     """
     try :
         if balance < 0 :
@@ -166,6 +196,9 @@ def setAccountBalance( accountId, balance, currency = None):
 def creditAccount( accountId, credit, currency = None):
     """
         Add funds to an account
+        @param accountId: ID of the account
+        @param credit: Amount to be credited ( >= 0 )
+        @param currency: Currency to be credited
     """
     try :
         if credit < 0 :
@@ -190,6 +223,12 @@ def creditAccount( accountId, credit, currency = None):
         return None
 
 def debitAccount( accountId, debit, currency = None):
+    """
+        Remove funds from an account
+        @param accountId: ID of the account
+        @param debit: Amount to be debited ( >= 0 )
+        @param currency: Currency to be debited
+    """
     try :
         if debit < 0 :
             PhoneSELogger.warning( "Account balance update failed: Debit cannot be negative." )
@@ -217,6 +256,9 @@ def debitAccount( accountId, debit, currency = None):
         return None
 
 def deleteAccount( accountId ):
+    """
+        Deletes the account "virtually" for the user.
+    """
     try :
         account = getAccount( accountId )
 

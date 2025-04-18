@@ -8,7 +8,7 @@ class Budget(db.Model):
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.String(100), nullable=False)
     creationDate = db.Column(db.DateTime, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    userId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     # Nullable Fields
     duration = db.Column(db.String(40), nullable=True)

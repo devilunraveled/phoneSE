@@ -1,12 +1,20 @@
 from src import db
-
+from dataclasses import dataclass
 from src.constants import CURRENCY_LIST
 
+@dataclass
 class Account(db.Model):
     """
         Backend for any source / wallet / account that can 
         be used to make transactions.
     """
+    id : int
+    name : str
+    userId : int
+    balance : float
+    currency : str
+    budget : int
+    description : str
 
     __tablename__ = 'accounts'
 
