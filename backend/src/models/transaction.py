@@ -1,11 +1,10 @@
 from sqlalchemy import Table, Column
-from sqlalchemy.orm import registry, Mapped
+from sqlalchemy.orm import Mapped
 from dataclasses import dataclass
+from typing import List
 
 from .category import Category
 from src import db
-
-reg = registry()
 
 transactionCategoryAssociation = Table(
     'transactionCategoryAssociation',
@@ -26,7 +25,7 @@ class Transaction(db.Model):
     description : str
     timestamp : str
     frozen : bool
-    categories : Mapped[Category]
+    categories : Mapped[List[Category]]
 
     __tablename__ = 'transactions'
     # Non Nullable Fields
@@ -43,7 +42,8 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    categories = db.relationship('Category', secondary=transactionCategoryAssociation)
+    categories = db.relationship('Category', 
+                                 secondary=transactionCategoryAssociation)
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)

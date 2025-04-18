@@ -3,6 +3,7 @@ from datetime import datetime
 
 from src import db
 from src.models.transaction import Transaction
+from .category import getCategories
 
 transactionBp = Blueprint('transaction', __name__)
 
@@ -17,28 +18,32 @@ def createTransaction():
 	   Otherwise, commit transaction to database and return success.
 	"""
 	try:
-		id = request.json['id']
-		amount = request.json['amount']
-		currency = request.json['currency']
-		payee = request.json['payee']
-		payer = request.json['payer']
-		name = request.json['name']
-		description = request.json['description']
-		categories = request.json['categories']
+		data = request.get_json()
+		if not data:
+			return Response(json.dumps({"message": "Input data not provided or invalid"}), status=400, mimetype='application/json')
 
-		# categories = getCategories(categories) # Get the list of category objects from the list of category IDs
+		categoryIds = data['categories']
+		if not categoryIds:
+			categoryIds = []
+		
+		categories: list
+		try:
+			categories = getCategories(categoryIds)
+		except Exception as e:
+			return Response(json.dumps({"message": "Internal server error: failed to get categories", "error": str(e)}), 
+				   			status=500, 
+							mimetype='application/json')
 
 		transaction = Transaction(
-			id=id,
-			amount=amount,
-			currency=currency,
-			payee=payee,
-			payer=payer,
-			name=name,
-			description=description,
+			amount = data['amount'],
+			currency = data['currency'],
+			payee = data['payee'],
+			payer = data['payer'],
+			name = data['name'],
+			description = data['description'],
 			timestamp=datetime.now(),
-			# categories=categories
 		)
+		transaction.categories.extend(categories)
 
 		db.session.add(transaction)
 		db.session.commit()
