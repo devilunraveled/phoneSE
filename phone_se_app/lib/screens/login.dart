@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'package:phone_se_app/screens/sign_up.dart';
 import 'package:phone_se_app/screens/dashboard.dart';
+import 'package:phone_se_app/constants.dart' as constants;
 
 class LoginScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneNoController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   LoginScreen({super.key});
@@ -17,10 +20,38 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: phoneNoController, decoration: InputDecoration(labelText: 'Phone Number')),
             TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
             ElevatedButton(
-              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DashboardScreen())),
+              onPressed: () {
+                // Call the login API
+                final String phoneNo = phoneNoController.text;
+                final String password = passwordController.text;
+                final String url = '${constants.apiUrl}/api/user/login';
+                final Map<String, String> headers = {
+                  'Content-Type': 'application/json',
+                };
+                final Map<String, String> body = {
+                  'phoneNumber': phoneNo,
+                  'password': password,
+                };
+                http.post(Uri.parse(url), headers: headers, body: json.encode(body)).then((response) {
+                  String token = '';
+                  if (response.statusCode == 200) {
+                    // Parse the response body
+                    final Map<String, dynamic> responseBody = json.decode(response.body);
+                    token = responseBody['token'];
+                    // Save the token in shared preferences or any other storage
+                    print('Token: $token');
+                    // Navigate to the dashboard screen
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DashboardScreen()));
+                  } else {
+                    // Handle error
+                    print('Login failed: ${response.body}');
+                  }
+                });
+              },
               child: Text('Login'),
             ),
             TextButton(
