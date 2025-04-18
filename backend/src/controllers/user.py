@@ -16,11 +16,11 @@ def createUser(data) -> Optional[User]:
     try:
         firstName = data.get('firstName')
         lastName = data.get('lastName')
-        callingCode = data.get('callingCode')
+        countryCode = data.get('countryCode')
         phoneNumber = data.get('phoneNumber')
         password = data.get('password')
 
-        if not phoneNumber or not callingCode:
+        if not phoneNumber or not countryCode:
             PhoneSELogger.error("Phone number or calling code not provided")
             return None
 
@@ -37,7 +37,7 @@ def createUser(data) -> Optional[User]:
         newUser = User(
             firstName=firstName,
             lastName=lastName,
-            callingCode=callingCode,
+            countryCode=countryCode,
             phoneNumber=phoneNumber,
             passwordHash=hashedPassword
         )
@@ -56,13 +56,13 @@ def validateUser(data) -> Optional[User]:
         raise Exception("Phone number or password not provided")
     
     # check if user exists
-    user = User.query.filter_by(phoneNumber=phoneNumber).first()
+    user: Optional[User] = User.query.filter_by(phoneNumber=phoneNumber).first()
     if not user:
         PhoneSELogger.error(f"User with phone number {phoneNumber} does not exist")
         raise Exception("User does not exist")
 
     # check if password is correct
-    if not bcrypt.check_password_hash(user.password_hash, password):
+    if not bcrypt.check_password_hash(user.passwordHash, password):
         raise Exception("Invalid password")
 
     return user
