@@ -1,7 +1,8 @@
 from sqlalchemy import Table, Column
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import registry, Mapped
 from dataclasses import dataclass
 
+from .category import Category
 from src import db
 
 reg = registry()
@@ -14,7 +15,19 @@ transactionCategoryAssociation = Table(
     keep_existing=True
 )
 
+@dataclass
 class Transaction(db.Model):
+    id : int
+    amount : float
+    currency : int
+    payee : int
+    payer : int
+    name : str
+    description : str
+    timestamp : str
+    frozen : bool
+    categories : Mapped[Category]
+
     __tablename__ = 'transactions'
     # Non Nullable Fields
     id = db.Column(db.Integer, primary_key=True, unique=True)
@@ -34,6 +47,3 @@ class Transaction(db.Model):
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

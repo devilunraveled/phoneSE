@@ -26,6 +26,8 @@ def createTransaction():
 		description = request.json['description']
 		categories = request.json['categories']
 
+		# categories = getCategories(categories) # Get the list of category objects from the list of category IDs
+
 		transaction = Transaction(
 			id=id,
 			amount=amount,
@@ -55,21 +57,11 @@ def getTransaction(id: int):
 				   			status=404,
 							mimetype='application/json')
 		
-		response = {
-			"id": transaction.id,
-			"amount": transaction.amount,
-			"currency": transaction.currency,
-			"payee": transaction.payee,
-			"payer": transaction.payer,
-			"name": transaction.name,
-			"description": transaction.description,
-			"timestamp": str(transaction.timestamp)
-		}
+		response = json.jsonify(transaction)
+		
 		# ? how to jsonify db.Model object
-		return Response(str(response),
-				  		status=200,
-						mimetype='application/json')
-
+		return response
+	
 	except Exception as e:
 		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
