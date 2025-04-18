@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:phone_se_app/screens/dashboard.dart';
 import 'package:phone_se_app/constants.dart' as constants;
+
+final storage = FlutterSecureStorage();
 
 class SignupScreen extends StatelessWidget {
   final TextEditingController firstNameController = TextEditingController();
@@ -53,7 +56,7 @@ class SignupScreen extends StatelessWidget {
                     final Map<String, dynamic> responseBody = json.decode(response.body);
                     token = responseBody['token'];
                     // Save the token in shared preferences or any other storage
-                    print('Token: $token');
+                    storage.write(key: 'token', value: token);
                     // Navigate to the dashboard screen
                     // ignore: use_build_context_synchronously
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DashboardScreen()));
