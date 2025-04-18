@@ -1,15 +1,22 @@
 from flask import request, Response, json, Blueprint
-from src.models.user_model import User
+from src.models.user import User
 from src import bcrypt, db
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import jwt
 import os
 
 # creating a blueprint for user routes
-user_bp = Blueprint('user', __name__)
+userBp = Blueprint('user', __name__)
+
+#HEAD
+def checkIfUserExists(userId):
+    user = User.query.filter_by(id=userId).first()
+    if not user:
+        return False
+    return True
 
 # user registration route
-@user_bp.route('/register', methods=['POST'])
+@userBp.route('/register', methods=['POST'])
 def register_user():
     try :
         data = request.get_json()
@@ -42,29 +49,31 @@ def register_user():
             password_hash=hashed_password
         )
         db.session.add(new_user)
-        db.session.commit()
 
         payload = {
-            'iat': datetime.now(datetime.timezone.utc),
+            'iat': datetime.now(timezone.utc),
             'user_id': str(new_user.id),
             'firstname': new_user.firstname,
             'lastname': new_user.lastname,
             'phone_number': new_user.phone_number,
-            'exp': datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
+            'exp': datetime.now(timezone.utc) + timedelta(days=1)
         }
-        token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
+        token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
 
         response = json.dumps({
             "message": "User registered successfully",
             "token": token,
         })
 
+        db.session.commit()
+
         return Response(response, status=201, mimetype='application/json')
     except Exception as e:
+        db.session.rollback()
         return Response(json.dumps({"message": "An error occurred", "error": str(e)}), status=500, mimetype='application/json')
     
 # user login route
-@user_bp.route('/login', methods=['POST'])
+@userBp.route('/login', methods=['POST'])
 def login_user():
     try:
         data = request.get_json()
@@ -88,12 +97,12 @@ def login_user():
 
         # generate JWT token
         payload = {
-            'iat': datetime.now(datetime.timezone.utc),
+            'iat': datetime.now(timezone.utc),
             'user_id': str(user.id),
             'firstname': user.firstname,
             'lastname': user.lastname,
             'phone_number': user.phone_number,
-            'exp': datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
+            'exp': datetime.now(timezone.utc) + timedelta(days=1)
         }
         token = jwt.encode(payload,os.getenv('SECRET_KEY'),algorithm='HS256')
 
