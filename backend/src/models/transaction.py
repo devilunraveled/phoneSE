@@ -33,8 +33,8 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Integer, nullable=False)
     
-    payee = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    payer = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    payee = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
+    payer = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     
     # Nullable Fields
     name = db.Column(db.String(40), nullable=True)
@@ -42,8 +42,7 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    categories = db.relationship('Category', 
-                                 secondary=transactionCategoryAssociation)
+    categories = db.relationship('Category', secondary=transactionCategoryAssociation) 
     
     # Functional Fields : No control from frontend.
     frozen = db.Column(db.Boolean, nullable=False, default=False)
