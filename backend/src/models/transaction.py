@@ -24,7 +24,6 @@ class Transaction(db.Model):
     name : str
     description : str
     timestamp : str
-    frozen : bool
     categories : Mapped[List[Category]]
 
     __tablename__ = 'transactions'
@@ -43,6 +42,3 @@ class Transaction(db.Model):
 
     # Relationships
     categories = db.relationship('Category', secondary=transactionCategoryAssociation) 
-    
-    # Functional Fields : No control from frontend.
-    frozen = db.Column(db.Boolean, nullable=False, default=False)

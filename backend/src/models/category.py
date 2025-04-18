@@ -8,11 +8,13 @@ class Category(db.Model):
     name: str
     description: str
     budgetId: int
+    userId : int
     
     __tablename__ = 'categories'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(40), nullable=False)
+    userId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     description = db.Column(db.String(100), nullable=True)
     
