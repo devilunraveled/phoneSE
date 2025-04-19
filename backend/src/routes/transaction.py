@@ -41,8 +41,6 @@ def createTransaction():
                             status=500, 
                             mimetype='application/json')
 
-        # Get relevant budgets
-        relevantBudgets: List[Budget]
         try:
             relevantBudgets = budgetController.getRelevantBudgets(transaction)
             if relevantBudgets is None:
@@ -53,8 +51,6 @@ def createTransaction():
                             status=500, 
                             mimetype='application/json')
 
-        # Get active budget cycles
-        budgetCycles: List[BudgetCycle]
         try:
             budgetCycles = [ budgetController.getActiveBudgetCycle(budget) for budget in relevantBudgets]
             
@@ -71,6 +67,9 @@ def createTransaction():
 
         # Add transaction to respective budget cycles
         for budgetCycle in budgetCycles:
+            if budgetCycle is None:
+                PhoneSELogger.critical("Budget Cycle found None despite checking.")
+                continue
             budgetCycle.transactions.append(transaction)
 
         db.session.add(transaction)
