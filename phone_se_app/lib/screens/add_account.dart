@@ -51,10 +51,10 @@ class AddAccountDialog extends StatelessWidget {
               // Call API to add account
               storage.read(key: 'token').then((token) {
                 http.post(
-                  Uri.parse('${constants.apiUrl}/api/account/create/$token'),
+                  Uri.parse('${constants.apiUrl}/api/account/create'),
                   headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer $token',
+                    'Authorization': '$token',
                   },
                   body: jsonEncode({
                     'name': accountName,
