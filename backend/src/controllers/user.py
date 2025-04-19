@@ -71,7 +71,7 @@ def validateUser(data) -> Optional[User]:
 def generateJwtToken(user: User):
     payload = {
         'iat': datetime.now(timezone.utc),
-        'user_id': str(user.id),
+        'userId': str(user.id),
         'firstName': user.firstName,
         'lastName': user.lastName,
         'phoneNumber': user.phoneNumber,
@@ -79,3 +79,23 @@ def generateJwtToken(user: User):
     }
     token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
     return token
+
+def decodeJwtToken(token: str):
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        PhoneSELogger.info("Decoded token.")
+        return payload
+    except jwt.ExpiredSignatureError:
+        PhoneSELogger.error("Token has expired")
+        return None
+    except jwt.InvalidTokenError:
+        PhoneSELogger.error("Invalid token")
+        return None
+
+def getUserIdFromToken(token: str) -> Optional[int]:
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        return payload['userId']
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+        return None
