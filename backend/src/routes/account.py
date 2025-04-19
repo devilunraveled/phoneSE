@@ -15,8 +15,8 @@ from src.models import (
 accountBp = Blueprint('account', __name__)
 
 # POST
-@accountBp.route('/create', methods=['POST'])
-def createAccount():
+@accountBp.route('/create/<int:id>', methods=['POST'])
+def createAccount(id: int):
     """
     1. Create account object with the details provided in request.
     2. Add the account to the database.
@@ -31,7 +31,7 @@ def createAccount():
 
         account: Optional[Account]
         try:
-            account = accountController.createAccount(**data)
+            account = accountController.createAccount(id, **data)
             if account is None:
                 raise Exception("Failed to create account object")
         except Exception as e:

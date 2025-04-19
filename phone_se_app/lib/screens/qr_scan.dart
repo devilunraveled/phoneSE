@@ -64,7 +64,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Status: ${response.status}')),
     );
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ExpenseLogScreen(amount: _amount)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ExpenseLogScreen(amount:double.tryParse(_amount!))));
   }
 
   @override
