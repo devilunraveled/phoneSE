@@ -5,6 +5,7 @@ from src import db, PhoneSELogger
 from src.controllers import (
         transaction as transactionController,
         budget as budgetController,
+        user as userController
         )
 from src.models import (
         Transaction,
@@ -103,4 +104,55 @@ def getTransaction(id: int):
 
     except Exception as e:
         PhoneSELogger.error(f"Failed to get transaction: {e}")
+        return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+
+@transactionBp.route('/getByAccount/<int:accountId>', methods=['GET'])
+def getTransactionsByAccount(accountId: int):
+    try:
+        transactions: Optional[List[Transaction]]
+        try:
+            transactions = transactionController.getTransactionsByAccount(accountId)
+            if transactions is None:
+                raise Exception("Failed to get transactions object")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get transactions: {e}")
+            return Response(json.dumps({"message": "Failed to get transactions", "error": str(e)}), 
+                            status=500, 
+                            mimetype='application/json')
+
+        response = json.jsonify({"transactions": transactions})
+        return response
+
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get transactions: {e}")
+        return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+
+@transactionBp.route('/getByUser', methods=['GET'])
+def getTransactionsByUser():
+    try:
+        userId: int
+        try:
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+            return Response(json.dumps({"message": "Failed to decode user token", "error": str(e)}), status=500, mimetype='application/json')
+        
+        transactions: Optional[List[Transaction]]
+        try:
+            transactions = transactionController.getTransactionsByUser(userId)
+            if transactions is None:
+                raise Exception("Failed to get transactions object")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get transactions: {e}")
+            return Response(json.dumps({"message": "Failed to get transactions", "error": str(e)}), 
+                            status=500, 
+                            mimetype='application/json')
+
+        response = json.jsonify({"transactions": transactions})
+
+        return response
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get transactions: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')

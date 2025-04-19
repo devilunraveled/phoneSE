@@ -91,3 +91,11 @@ def decodeJwtToken(token: str):
     except jwt.InvalidTokenError:
         PhoneSELogger.error("Invalid token")
         return None
+
+def getUserIdFromToken(token: str) -> Optional[int]:
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        return payload['userId']
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+        return None
