@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:phone_se_app/screens/add_account.dart';
+
 class CategoryField extends StatelessWidget {
   final TextEditingController controller;
   final String? selectedCategory;
@@ -79,27 +81,10 @@ class AccountField extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: Text('Add New Account'),
-                content: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(labelText: 'Account Name'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Add the new account logic here
-                      Navigator.pop(context);
-                    },
-                    child: Text('Add'),
-                  ),
-                ],
+              return AddAccountDialog(
+                controller: controller,
+                selectedAccount: selectedAccount,
+                accounts: accounts,
               );
             },
           );

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:phone_se_app/screens/dashboard.dart';
+import 'package:phone_se_app/screens/login.dart';
 import 'package:phone_se_app/constants.dart' as constants;
 
 final storage = FlutterSecureStorage();
@@ -35,7 +36,7 @@ class SignupScreen extends StatelessWidget {
                 // Call the signup API
                 final String firstName = firstNameController.text;
                 final String lastName = lastNameController.text;
-                final String callingCode = callingCodeController.text;
+                final String countryCode = callingCodeController.text;
                 final String phoneNo = phoneNoController.text;
                 final String password = passwordController.text;
                 final String url = '${constants.apiUrl}/api/user/register';
@@ -45,7 +46,7 @@ class SignupScreen extends StatelessWidget {
                 final Map<String, String> body = {
                   'firstName': firstName,
                   'lastName': lastName,
-                  'callingCode': callingCode,
+                  'countryCode': countryCode,
                   'phoneNumber': phoneNo,
                   'password': password,
                 };
@@ -68,6 +69,10 @@ class SignupScreen extends StatelessWidget {
               },
               child: Text('Create Account'),
             ),
+            TextButton(
+              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen())),
+              child: Text("Already have an account? Login"),
+            )
           ],
         ),
       ),
