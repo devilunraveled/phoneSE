@@ -37,11 +37,3 @@ class BudgetCycle(db.Model):
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
 
     transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)
-
-    def __init__(self, amount, currency, startDate, endDate, budgetId):
-        super().__init__()
-        self.amount = amount
-        self.currency = currency
-        self.startDate = startDate
-        self.endDate = endDate
-        self.budgetId = budgetId
