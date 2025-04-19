@@ -33,6 +33,3 @@ class Account(db.Model):
     # Nullable Fields
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=True)
     description = db.Column(db.String(100), nullable=True)
-
-    def __repr__(self):
-        return '<%r Account>' % self.name

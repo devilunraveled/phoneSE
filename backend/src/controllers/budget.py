@@ -15,7 +15,7 @@ from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
 
 # POST
-def createBudget( name, userId, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
+def createBudget( name, userId, amount, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
     if not checkIfUserExists( userId ):
         PhoneSELogger.error( "Budget creation failed: User does not exist" )
         return None
@@ -31,8 +31,10 @@ def createBudget( name, userId, duration = None, description = None ) ->Optional
                 userId=userId, 
                 duration=duration, 
                 description=description,
+                amount=amount,
                 creationDate=createTime)
         
+
         newBudgetCycle = createBudgetCycle(budget, createTime)
         if newBudgetCycle is None:
             PhoneSELogger.error("Budget creation failed: Failed to create budget cycle")
@@ -220,17 +222,21 @@ def getRelevantBudgets( transaction ) -> Optional[list[Budget]]:
             PhoneSELogger.error("Failed to get relevant budgets: No categories found")
             return None
 
-        budgetIds = [category.budgetId for category in categories]
+        budgetIds = [category.budgetId for category in categories if category.budgetId is not None]
         budgets = Budget.query.filter(Budget.id.in_(budgetIds)).all()
 
         if budgets is None or any(budget is None for budget in budgets):
             PhoneSELogger.error("Failed to get relevant budgets: No budgets found")
             return None
 
-        account = transaction.payer
+        account = Account.query.filter(Account.id == transaction.payer).first()
+        print(account)
         if account is None:
             PhoneSELogger.error("Failed to get relevant budgets: Payer account not found")
             return None
+
+        if account.budgetId is None:
+            return budgets
 
         budget = getBudget(account.budgetId)
 
@@ -243,4 +249,6 @@ def getRelevantBudgets( transaction ) -> Optional[list[Budget]]:
         return budgets
     except Exception as e:
         PhoneSELogger.error(f"Failed to get relevant budgets: {e}")
+        import traceback
+        traceback.print_exc()
         return None

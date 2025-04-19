@@ -16,7 +16,7 @@ accountBp = Blueprint('account', __name__)
 
 # POST
 @accountBp.route('/create', methods=['POST'])
-def createAccount(id: int):
+def createAccount():
     """
     1. Create account object with the details provided in request.
     2. Add the account to the database.
@@ -37,10 +37,11 @@ def createAccount(id: int):
         except Exception as e:
             PhoneSELogger.error(f"Failed to create account: {e}")
             return Response(json.dumps({"message": "Failed to create account", "error": str(e)}), status=500, mimetype='application/json')
+        
 
         account: Optional[Account]
         try:
-            account = accountController.createAccount(id, **data)
+            account = accountController.createAccount(userId, **data)
             if account is None:
                 raise Exception("Failed to create account object")
         except Exception as e:
@@ -80,7 +81,6 @@ def getAccount(id: int):
     except Exception as e:
         PhoneSELogger.error(f"Failed to get account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
-
 
 # GET
 @accountBp.route('/getDetails/<int:id>', methods=['GET'])
@@ -272,7 +272,7 @@ def debitAccount(id: int):
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
-@accountBp.route('/getUserAccounts/', methods=['GET'])
+@accountBp.route('/getByUser', methods=['GET'])
 def getUserAccounts():
     """
         Returns the transactions of the account

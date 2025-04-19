@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import List
 
 from src import db
+from src.constants import CURRENCY_LIST
 from .transaction import Transaction
 
 transactionBudgetCycleAssociation = Table(
@@ -29,7 +30,11 @@ class BudgetCycle(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
     amount = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.Integer, nullable=False)
+    currency = db.Column(
+            db.String(4), 
+            nullable=False, 
+            default=CURRENCY_LIST[0]
+        )
 
     startDate = db.Column(db.DateTime, nullable=False)
     duration = db.Column(db.Integer, nullable=False)
