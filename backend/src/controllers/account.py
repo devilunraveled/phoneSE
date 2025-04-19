@@ -245,7 +245,7 @@ def debitAccount( accountId, debit, currency = None):
 
         if account.balance < debit:
             PhoneSELogger.error( "Account balance update failed: Insufficient funds" )
-            return None
+            # return None
 
         account.balance -= debit
 

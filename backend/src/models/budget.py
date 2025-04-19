@@ -14,7 +14,7 @@ class Budget(db.Model):
     # Nullable Fields
     amount = db.Column(db.Float, nullable=True, default=0.0)
     currency = db.Column(
-            db.Enum(*CURRENCY_LIST, name = 'currency_enum', native_enum=False), 
+            db.String(4), 
             nullable=False, 
             default=CURRENCY_LIST[0]
         ) # Suggestion for portability
@@ -27,6 +27,6 @@ class Budget(db.Model):
 
     def getDuration(self):
         if self.duration is None:
-            return "15"
+            return 15
 
         return self.duration

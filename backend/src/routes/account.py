@@ -37,6 +37,7 @@ def createAccount():
         except Exception as e:
             PhoneSELogger.error(f"Failed to create account: {e}")
             return Response(json.dumps({"message": "Failed to create account", "error": str(e)}), status=500, mimetype='application/json')
+        
 
         userId: int
         try:
@@ -90,7 +91,6 @@ def getAccount(id: int):
     except Exception as e:
         PhoneSELogger.error(f"Failed to get account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
-
 
 # GET
 @accountBp.route('/getDetails/<int:id>', methods=['GET'])
@@ -282,7 +282,7 @@ def debitAccount(id: int):
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
-@accountBp.route('/getUserAccounts', methods=['GET'])
+@accountBp.route('/getByUser', methods=['GET'])
 def getUserAccounts():
     """
         Returns the transactions of the account

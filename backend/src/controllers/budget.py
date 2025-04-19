@@ -15,7 +15,7 @@ from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
 
 # POST
-def createBudget( name, userId, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
+def createBudget( name, userId, createTime, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
     if not checkIfUserExists( userId ):
         PhoneSELogger.error( "Budget creation failed: User does not exist" )
         return None
@@ -25,7 +25,6 @@ def createBudget( name, userId, duration = None, description = None ) ->Optional
             description = ""
 
         PhoneSELogger.info(f"Creating budget: {name}")
-        createTime = datetime.now()
         budget = Budget(
                 name=name, 
                 userId=userId, 
@@ -88,7 +87,7 @@ def createNewBudgetCycle( budgetId ):
             return None
         
         # Make the new cycle active.
-        newBudgetCycle : BudgetCycle = createBudgetCycle(budget)
+        newBudgetCycle : BudgetCycle = createBudgetCycle(budget, datetime.now())
 
         budget.budgetCycles.append(newBudgetCycle)
         budget.activeBudgetCycleId = newBudgetCycle.id
@@ -227,18 +226,30 @@ def getRelevantBudgets( transaction ) -> Optional[list[Budget]]:
             PhoneSELogger.error("Failed to get relevant budgets: No budgets found")
             return None
 
-        account = transaction.payer
-        if account is None:
-            PhoneSELogger.error("Failed to get relevant budgets: Payer account not found")
-            return None
-
-        budget = getBudget(account.budgetId)
-
-        if budget is None:
-            PhoneSELogger.error("Failed to get relevant budgets: Budget does not exist")
+        account = Account.query.get(transaction.payer)
+        if account is None : 
+            PhoneSELogger.error("Failed to get relevant payer account budget: Account does not exist")
             return None
         
-        budgets.append(budget)
+        if account.budgetId is not None:
+            budgets.append(getBudget(account.budgetId))
+        else :
+            PhoneSELogger.info("Payer account not associated with a budget for this transaction")
+
+        user = User.query.get(account.userId)
+        if user is None:
+            PhoneSELogger.error("Failed to get relevant budget for the payer : User does not exist")
+            return None
+        
+        if user.budgetId is not None:
+            userOverallBudget = getBudget(user.budgetId)
+        else :
+            userOverallBudget = None
+
+        if userOverallBudget is None:
+            PhoneSELogger.info("User does not have an overall budget")
+        else :
+            budgets.append(userOverallBudget)
 
         return budgets
     except Exception as e:

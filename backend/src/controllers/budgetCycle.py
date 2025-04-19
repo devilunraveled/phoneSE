@@ -19,7 +19,7 @@ def createBudgetCycle( budget : Budget, startDate ) -> Optional[BudgetCycle]:
         budgetCycle = BudgetCycle(amount = budget.amount, 
                                   currency = budget.currency, 
                                   startDate = startDate, 
-                                  endDate = startDate + budget.duration, 
+                                  duration=budget.getDuration(), 
                                   budgetId = budget.id )
         return budgetCycle
     except Exception as e:
