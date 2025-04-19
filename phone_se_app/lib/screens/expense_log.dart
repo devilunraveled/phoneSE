@@ -5,19 +5,21 @@ import 'dart:convert';
 
 import 'package:phone_se_app/constants.dart' as constants;
 import 'package:phone_se_app/screens/add_account.dart';
+import 'package:phone_se_app/screens/add_category.dart';
 
 final storage = FlutterSecureStorage();
 
 class CategoryField extends StatelessWidget {
   final TextEditingController controller;
+  final List<DropdownMenuItem<String>> categories;
+  final Function fetchCategories;
+  final Function setCategory;
 
-  final List<DropdownMenuItem> categories;
-
-  const CategoryField({super.key, required this.controller, required this.categories});
+  CategoryField({super.key, required this.controller, required this.categories, required this.fetchCategories, required this.setCategory});
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<dynamic>(
+    return DropdownButtonFormField<String>(
       decoration: InputDecoration(labelText: 'Category'),
       items: categories,
       onChanged: (value) {
@@ -26,32 +28,14 @@ class CategoryField extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: Text('Add New Category'),
-                content: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(labelText: 'Category Name'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Add the new category logic here
-                      Navigator.pop(context);
-                    },
-                    child: Text('Add'),
-                  ),
-                ],
-              );
+              return AddCategoryDialog(updateCategories: fetchCategories);
             },
           );
+          controller.text = '';
+          setCategory(0);
         } else {
           controller.text = categories[int.parse(value!) - 1].child.toString();
+          setCategory(int.parse(value));
         }
       },
     );
@@ -60,14 +44,15 @@ class CategoryField extends StatelessWidget {
 
 class AccountField extends StatelessWidget {
   final TextEditingController controller;
+  final List<DropdownMenuItem<String>> accounts;
+  final Function fetchAccounts;
+  final Function setAccount;
 
-  final List<DropdownMenuItem> accounts;
-
-  const AccountField({super.key, required this.controller,required this.accounts});
+  AccountField({super.key, required this.controller, required this.accounts, required this.fetchAccounts, required this.setAccount});
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<dynamic>(
+    return DropdownButtonFormField<String>(
       decoration: InputDecoration(labelText: 'Account'),
       items: accounts,
       onChanged: (value) {
@@ -76,11 +61,14 @@ class AccountField extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) {
-              return AddAccountDialog();
+              return AddAccountDialog(updateAccounts: fetchAccounts);
             },
           );
+          controller.text = '';
+          setAccount(0);
         } else {
           controller.text = accounts[int.parse(value!) - 1].child.toString();
+          setAccount(int.parse(value));
         }
       },
     );
@@ -100,23 +88,27 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+  final TextEditingController currencyController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
 
-  List<DropdownMenuItem> categories = [];
-  List<DropdownMenuItem> accounts = [];
+  List<DropdownMenuItem<String>> categories = [];
+  List<DropdownMenuItem<String>> accounts = [];
+
+  int selectedCategory = 0;
+  int selectedAccount = 0;
 
   void fetchCategories() {
     storage.read(key: 'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/getUserCategories/$token'),
+        Uri.parse('${constants.apiUrl}/api/category/getByUser'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',
         },
       ).then((response) {
         if (response.statusCode == 200) {
-          final List<dynamic> data = jsonDecode(response.body)['categories'];
+          final List<dynamic> data = jsonDecode(response.body);
           setState(() {
             categories = data.map((category) => DropdownMenuItem(
               value: category['id'].toString(),
@@ -156,6 +148,17 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
     });
   }
 
+  void setCategory(int category) {
+    setState(() {
+      selectedCategory = category;
+    });
+  }
+  void setAccount(int account) {
+    setState(() {
+      selectedAccount = account;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -172,12 +175,26 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         child: Column(
           children: [
             TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
               controller: amountController..text = widget.amount?.toString() ?? '',
               decoration: InputDecoration(labelText: 'Amount'),
               keyboardType: TextInputType.number,
             ),
-            CategoryField(controller: categoryController, categories: categories),
-            AccountField(controller: accountController, accounts: accounts),
+            TextField(
+              controller: currencyController,
+              decoration: InputDecoration(labelText: 'Currency'),
+              // set default to INR
+              
+            ),
+            CategoryField(controller: categoryController, categories: categories, fetchCategories: fetchCategories, setCategory: setCategory),
+            AccountField(controller: accountController, accounts: accounts, fetchAccounts: fetchAccounts, setAccount: setAccount),
             ElevatedButton(
               onPressed: () {
                 storage.read(key: 'token').then((token) {
@@ -191,21 +208,22 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       'name': nameController.text,
                       'description': descriptionController.text,
                       'amount': double.tryParse(amountController.text) ?? 0.0,
-                      'category_id': categoryController.text,
-                      'account_id': accountController.text,
+                      'currency': currencyController.text,
+                      'payer': selectedAccount,
+                      'payee': selectedAccount,
+                      'categories': [selectedCategory],
                     }),
                   ).then((response) {
                     if (response.statusCode == 200) {
                       // Successfully logged expense
                       print('Expense logged successfully');
-                      // Optionally, you can navigate back or show a success message
+                      Navigator.pop(context);
                     } else {
                       // Handle error
                       print('Failed to log expense');
                     }
                   });
                 });
-                Navigator.pop(context);
               },
               child: Text('Save Expense'),
             ),
