@@ -1,9 +1,8 @@
-from flask import request, Response, json, Blueprint
-
-budgetBp = Blueprint('budget', __name__)
+from typing import Optional
+from src.models.budget import Budget
 
 # POST
-def createBudget( budgetDetails : dict ):
+def createBudget( ) ->Optional[Budget]:
     # Necessary parameters
     # budgetID, userID, amount, currency
     pass
