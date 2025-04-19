@@ -15,7 +15,7 @@ from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
 
 # POST
-def createBudget( name, userId, createTime, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
+def createBudget( name, userId, duration = None, description = None, amount = None ) ->Optional[tuple[Budget, BudgetCycle]]:
     if not checkIfUserExists( userId ):
         PhoneSELogger.error( "Budget creation failed: User does not exist" )
         return None
@@ -24,12 +24,14 @@ def createBudget( name, userId, createTime, duration = None, description = None 
         if description is None:
             description = ""
 
+        createTime = datetime.now()
         PhoneSELogger.info(f"Creating budget: {name}")
         budget = Budget(
                 name=name, 
                 userId=userId, 
                 duration=duration, 
                 description=description,
+                amount=amount,
                 creationDate=createTime)
         
         newBudgetCycle = createBudgetCycle(budget, createTime)
@@ -38,7 +40,6 @@ def createBudget( name, userId, createTime, duration = None, description = None 
             return None
 
         budget.budgetCycles.append(newBudgetCycle)
-        budget.activeBudgetCycleId = newBudgetCycle.id
 
         PhoneSELogger.info(f"Budget created: {budget}")
         return budget, newBudgetCycle
@@ -228,7 +229,7 @@ def getRelevantBudgets( transaction ) -> Optional[list[Budget]]:
 
         account = Account.query.get(transaction.payer)
         if account is None : 
-            PhoneSELogger.error("Failed to get relevant payer account budget: Account does not exist")
+            PhoneSELogger.error("Failed to get relevant payer account: Account does not exist")
             return None
         
         if account.budgetId is not None:

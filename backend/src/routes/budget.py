@@ -53,6 +53,9 @@ def createBudget():
         db.session.add(budgetCycle)
         db.session.commit()
 
+        budget.activeBudgetCycleId = budgetCycle.id
+        db.session.commit()
+
         return Response(json.dumps({"message": "Budget created successfully"}), status=200, mimetype='application/json')
     except Exception as e:
         db.session.rollback()
