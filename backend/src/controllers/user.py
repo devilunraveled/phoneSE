@@ -3,8 +3,7 @@ import os
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from src import bcrypt, db, PhoneSELogger
-from src.controllers.budget import getBudget
+from src import bcrypt, PhoneSELogger
 from src.models import User
 
 def checkIfUserExists(userId):

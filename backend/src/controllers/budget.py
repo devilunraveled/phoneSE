@@ -1,12 +1,13 @@
-from typing import Any, Optional
+from typing import Optional
 
 from src import PhoneSELogger
 
 from src.models.budget import Budget
 from src.models.budgetCycle import BudgetCycle
-from src.models.transaction import Transaction
 from src.models.category import Category
+from src.models.transaction import Transaction
 from src.models.account import Account
+from src.models.user import User
 
 from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
@@ -29,7 +30,11 @@ def createBudget( name, userId, createTime, duration = None, description = None 
                 description=description,
                 creationDate=createTime)
         
-        newBudgetCycle = createBudgetCycle(budget)
+        newBudgetCycle = createBudgetCycle(budget, createTime)
+        if newBudgetCycle is None:
+            PhoneSELogger.error("Budget creation failed: Failed to create budget cycle")
+            return None
+
         budget.budgetCycles.append(newBudgetCycle)
         budget.activeBudgetCycleId = newBudgetCycle.id
 
@@ -169,4 +174,54 @@ def getUserBudgets( userId : int ):
         return budgets
     except Exception as e:
         PhoneSELogger.error(f"Failed to get user overall budget: {e}")
+        return None
+
+def getUserOverallBudget( userId : int ):
+    try :
+        user = User.query.filter_by(id=userId).first()
+        if user is None : 
+            PhoneSELogger.error("User does not exist")
+            return None
+
+        budget = getBudget(user.budgetId)
+
+        if budget is None:
+            PhoneSELogger.error("Failed to get user overall budget: Budget does not exist")
+            return None
+
+        return budget
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user overall budget: {e}")
+        return None
+
+def getRelevantBudgets( transaction ) -> Optional[list[Budget]]:
+    try :
+        categories = transaction.categories
+        if categories is None or any(category is None for category in categories):
+            PhoneSELogger.error("Failed to get relevant budgets: No categories found")
+            return None
+
+        budgetIds = [category.budgetId for category in categories]
+        budgets = Budget.query.filter(Budget.id.in_(budgetIds)).all()
+
+        if budgets is None or any(budget is None for budget in budgets):
+            PhoneSELogger.error("Failed to get relevant budgets: No budgets found")
+            return None
+
+        account = transaction.payer
+        if account is None:
+            PhoneSELogger.error("Failed to get relevant budgets: Payer account not found")
+            return None
+
+        budget = getBudget(account.budgetId)
+
+        if budget is None:
+            PhoneSELogger.error("Failed to get relevant budgets: Budget does not exist")
+            return None
+        
+        budgets.append(budget)
+
+        return budgets
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get relevant budgets: {e}")
         return None
