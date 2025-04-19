@@ -131,7 +131,7 @@ def getBudgetTransactions( budgetId ):
         return None
 
 def getActiveBudgetCycle( budget : Budget ):
-     
+    pass
 
 def getBudgetCategories():
     pass

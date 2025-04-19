@@ -2,34 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:phone_se_app/screens/add_account.dart';
 import 'package:phone_se_app/constants.dart' as constants;
 
 final storage = FlutterSecureStorage();
 
 class AccountItem {
-  final String id;
+  final int id;
   final String name;
-  final String amount;
-  final String budgetName;
+  final double balance;
+  final String currency;
 
-  AccountItem({required this.id, required this.name, required this.amount, required this.budgetName});
+  AccountItem({required this.id, required this.name, required this.balance, required this.currency});
 
-  Widget buildAccountItem() {
+  Widget buildAccountItem(BuildContext context, Function updateAccounts) {
     return Card(
       child: InkWell(
         onTap: () {
-          // Handle account item tap
-          if (id == '0') {
-            // Navigate to add account screen
-            print('Navigate to add account screen');
-          } else {
-            // Navigate to account details screen
-            print('Navigate to account details screen for account ID: $id');
-          }
+          // Navigate to account details screen
+          print('Navigate to account details screen for account ID: $id');
         },
         child: ListTile(
           title: Text(name),
-          subtitle: Text('Budget: $budgetName\nAmount: $amount'),
+          subtitle: Text('Balance: $balance $currency'),
+        ),
+      )
+    );
+  }
+}
+
+class AddAccountItem {
+  Widget buildAddAccountItem(BuildContext context, Function updateAccounts) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          // Show dialog to add new account
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AddAccountDialog(updateAccounts: updateAccounts);
+            },
+          );
+        },
+        child: ListTile(
+          title: Text('Add Account'),
+          subtitle: Text('Click to add a new account'),
         ),
       )
     );
@@ -44,33 +62,25 @@ class AccountsScreen extends StatefulWidget {
 }
 
 class _AccountsScreenState extends State<AccountsScreen> {
-  late List<AccountItem> accounts;
+  List<AccountItem> accounts = [];
 
-  @override
-  void initState() {
-    super.initState();
+  void updateAccounts() {
     storage.read(key: 'token').then((token) {
-      http.get(Uri.parse('${constants.apiUrl}/api/accounts/getUserAccounts'),
+      http.get(Uri.parse('${constants.apiUrl}/api/account/getUserAccounts/$token'),
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': '$token',
           'Content-Type': 'application/json',
         },
       ).then((response) {
         if (response.statusCode == 200) {
-          final List<dynamic> responseBody = json.decode(response.body);
+          final List<dynamic> responseBody = json.decode(response.body)['accounts'];
           setState(() {
             accounts = responseBody.map((account) => AccountItem(
               id: account['id'],
               name: account['name'],
-              amount: account['amount'],
-              budgetName: account['budgetName'],
+              balance: account['balance'],
+              currency: account['currency'],
             )).toList();
-            accounts.add(AccountItem(
-              id: '0',
-              name: 'Add Account',
-              amount: '',
-              budgetName: '',
-            ));
           });
         } else {
           // Handle error
@@ -78,6 +88,12 @@ class _AccountsScreenState extends State<AccountsScreen> {
         }
       });
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateAccounts();
   }
 
   @override
@@ -92,9 +108,12 @@ class _AccountsScreenState extends State<AccountsScreen> {
             SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: accounts.length,
+                itemCount: accounts.length + 1,
                 itemBuilder: (context, index) {
-                  return accounts[index].buildAccountItem();
+                  if (index == accounts.length) {
+                    return AddAccountItem().buildAddAccountItem(context, updateAccounts);
+                  }
+                  return accounts[index].buildAccountItem(context, updateAccounts);
                 },
               ),
             ),

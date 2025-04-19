@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Category {
+import 'package:phone_se_app/constants.dart' as constants;
+
+final storage = FlutterSecureStorage();
+
+class CategoryItem {
   final String name;
   final String budgetName;
   final String amount;
 
-  Category({required this.name, required this.budgetName, required this.amount});
+  CategoryItem({required this.name, required this.budgetName, required this.amount});
 
   Widget buildCategoryItem() {
     return Card(
@@ -17,12 +24,40 @@ class Category {
   }
 }
 
-class CategoriesScreen extends StatelessWidget {
-  final List<Category> categories = [
-    Category(name: 'Food', budgetName: 'Monthly Budget', amount: '₹5000'),
-    Category(name: 'Transport', budgetName: 'Weekly Budget', amount: '₹2000'),
-    Category(name: 'Entertainment', budgetName: 'Monthly Budget', amount: '₹3000'),
-  ];
+class CategoriesScreen extends StatefulWidget {
+  const CategoriesScreen({super.key});
+
+  @override
+  _CategoriesScreenState createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  List<CategoryItem> categories = [];
+
+  void updateCategories() {
+    storage.read(key:'token').then((token) {
+      http.get(
+        Uri.parse('${constants.apiUrl}/api/category/get/$token'),
+        headers: {
+          'Authorization': '$token',
+          'Content-Type': 'application/json',
+        },
+      ).then((response) {
+        if (response.statusCode == 200) {
+          final List<dynamic> data = jsonDecode(response.body)['categories'];
+          setState(() {
+            categories = data.map((category) => CategoryItem(
+              name: category['name'],
+              budgetName: category['budget_name'],
+              amount: category['amount'].toString(),
+            )).toList();
+          });
+        } else {
+          print('Failed to load categories');
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
