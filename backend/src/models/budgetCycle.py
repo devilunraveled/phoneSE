@@ -40,4 +40,4 @@ class BudgetCycle(db.Model):
     duration = db.Column(db.Integer, nullable=False)
 
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
-    transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)
+    transactions = db.relationship('Transaction', secondary=transactionBudgetCycleAssociation)

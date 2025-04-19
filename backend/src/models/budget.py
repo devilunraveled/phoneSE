@@ -1,7 +1,25 @@
+from sqlalchemy.orm import Mapped
+from dataclasses import dataclass
+from datetime import datetime
+from typing import List
+
 from src import db
 from src.constants import CURRENCY_LIST
+from .budgetCycle import BudgetCycle
 
+@dataclass
 class Budget(db.Model):
+    id: int
+    name: str
+    description: str
+    creationDate: datetime
+    userId : int
+    amount: float
+    currency: str
+    duration: int
+    budgetCycles: Mapped[List[BudgetCycle]]
+    activeBudgetCycleId: int
+
     __tablename__ = 'budgets'
     
     # Non nullable Fields

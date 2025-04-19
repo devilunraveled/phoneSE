@@ -136,11 +136,15 @@ def updateAccount(id: int):
         except Exception as e:
             PhoneSELogger.error(f"Failed to update account: {e}")
             return Response(json.dumps({"message": "Failed to update account", "error": str(e)}), status=500, mimetype='application/json')
+        
+        db.session.add(account)
+        db.session.commit()
 
         response = json.jsonify(account)
         return response
 
     except Exception as e:
+        db.session.rollback()
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 

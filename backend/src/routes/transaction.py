@@ -76,6 +76,7 @@ def createTransaction():
             return Response(json.dumps({"message": "Failed to get relevant budgets", "error": str(e)}), 
                             status=500, 
                             mimetype='application/json')
+        # print(relevantBudgets)
 
         try:
             budgetCycles = [ budgetController.getActiveBudgetCycle(budget) for budget in relevantBudgets]
@@ -90,6 +91,7 @@ def createTransaction():
             return Response(json.dumps({"message": "Failed to get budget cycles", "error": str(e)}), 
                             status=500, 
                             mimetype='application/json')
+        # print(budgetCycles)
 
         # Add transaction to respective budget cycles
         for budgetCycle in budgetCycles:
