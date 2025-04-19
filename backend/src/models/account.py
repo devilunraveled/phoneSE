@@ -31,7 +31,7 @@ class Account(db.Model):
         ) # Suggestion for portability
     
     # Nullable Fields
-    budget = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=True)
+    budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=True)
     description = db.Column(db.String(100), nullable=True)
 
     def __init__(self, name, userId ):
