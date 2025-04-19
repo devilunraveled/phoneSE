@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter_upi_india/flutter_upi_india.dart';
 
+import 'package:phone_se_app/screens/expense_log.dart';
+
 class QRScanScreen extends StatefulWidget {
   const QRScanScreen({super.key});
 
@@ -62,7 +64,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Status: ${response.status}')),
     );
-    Navigator.pop(context);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ExpenseLogScreen(amount: _amount)));
   }
 
   @override
