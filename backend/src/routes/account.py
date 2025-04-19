@@ -272,14 +272,19 @@ def debitAccount(id: int):
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
-@accountBp.route('/getUserAccounts/<int:id>', methods=['GET'])
-def getUserAccounts(id: int):
+@accountBp.route('/getUserAccounts/', methods=['GET'])
+def getUserAccounts():
     """
         Returns the transactions of the account
     """
     try:
+        userId = int
         try:
-            accounts = accountController.getUserAccounts(id)
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+
+            accounts = accountController.getUserAccounts(userId)
             if accounts is None:
                 raise Exception("Failed to get account object")
         except Exception as e:
