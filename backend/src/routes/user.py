@@ -27,17 +27,17 @@ def registerUser():
 			PhoneSELogger.error(f"Failed to create user: {e}")
 			return Response(json.dumps({"message": "Failed to create user", "error": str(e)}), 
 				   			status=500, 
-							mimetype='application/json')	
+							mimetype='application/json')
 		db.session.add(newUser)
+		db.session.commit()
 
 		token = userController.generateJwtToken(newUser)
 
 		response = json.dumps({
 			"message": "User registered successfully",
-			"token": newUser.id,
+			"token": token,
 		})
 
-		db.session.commit()
 
 		return Response(response, status=201, mimetype='application/json')
 	except Exception as e:
@@ -68,7 +68,7 @@ def loginUser():
 
 		response = json.dumps({
 			"message": "Login successful",
-			"token": user.id,
+			"token": token,
 		})
 
 		return Response(response, status=200, mimetype='application/json')

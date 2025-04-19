@@ -1,5 +1,6 @@
 import jwt
 import os
+import traceback
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -34,7 +35,6 @@ def createUser(data) -> Optional[User]:
         hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
 
         # create a new user
-
         newUser = User(
             firstName=firstName,
             lastName=lastName,
@@ -45,7 +45,8 @@ def createUser(data) -> Optional[User]:
 
         return newUser
     except Exception as e:
-        PhoneSELogger.error(f"Failed to create user: {e}")
+        traceback.print_exc()
+        PhoneSELogger.error(f"Failed to create user object: {e}")
         return None
 
 def validateUser(data) -> Optional[User]:

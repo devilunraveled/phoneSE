@@ -21,7 +21,7 @@ class Budget(db.Model):
     duration = db.Column(db.Integer, nullable=True)
 
     # Relationships
-    budgetCycles = db.relationship('BudgetCycle', foreign_keys='budgetCycles.budgetId')
+    budgetCycles = db.relationship('BudgetCycle', foreign_keys='BudgetCycle.budgetId')
     
     activeBudgetCycleId = db.Column(db.Integer, db.ForeignKey('budgetCycles.id'), nullable=True)
 

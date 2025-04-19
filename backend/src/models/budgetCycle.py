@@ -21,7 +21,7 @@ class BudgetCycle(db.Model):
     amount: float
     currency: int
     startDate: datetime
-    endDate: datetime
+    duration: int
     budgetId: int
     transactions: Mapped[List[Transaction]]
 
@@ -35,5 +35,4 @@ class BudgetCycle(db.Model):
     duration = db.Column(db.Integer, nullable=False)
 
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
-
     transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)

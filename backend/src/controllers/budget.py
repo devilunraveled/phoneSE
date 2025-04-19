@@ -15,7 +15,7 @@ from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
 
 # POST
-def createBudget( name, userId, createTime, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
+def createBudget( name, userId, duration = None, description = None ) ->Optional[tuple[Budget, BudgetCycle]]:
     if not checkIfUserExists( userId ):
         PhoneSELogger.error( "Budget creation failed: User does not exist" )
         return None
@@ -25,6 +25,7 @@ def createBudget( name, userId, createTime, duration = None, description = None 
             description = ""
 
         PhoneSELogger.info(f"Creating budget: {name}")
+        createTime = datetime.now()
         budget = Budget(
                 name=name, 
                 userId=userId, 
