@@ -34,6 +34,7 @@ def createUser(data) -> Optional[User]:
         hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
 
         # create a new user
+
         newUser = User(
             firstName=firstName,
             lastName=lastName,
