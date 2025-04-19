@@ -134,7 +134,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   void fetchAccounts() {
     storage.read(key: 'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/account/getUserAccounts/$token'),
+        Uri.parse('${constants.apiUrl}/api/account/getUserAccounts'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',
@@ -182,10 +182,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
               onPressed: () {
                 storage.read(key: 'token').then((token) {
                   http.post(
-                    Uri.parse('${constants.apiUrl}/api/expense/create/$token'),
+                    Uri.parse('${constants.apiUrl}/api/transaction/create'),
                     headers: {
                       'Content-Type': 'application/json',
-                      'Authorization': 'Bearer $token',
+                      'Authorization': '$token',
                     },
                     body: jsonEncode({
                       'name': nameController.text,
