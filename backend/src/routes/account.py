@@ -28,6 +28,15 @@ def createAccount():
         data = request.get_json()
         if not data:
             return Response(json.dumps({"message": "Input data not provided or invalid"}), status=400, mimetype='application/json')
+    
+        userId : Optional[int]
+        try :
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to create account: {e}")
+            return Response(json.dumps({"message": "Failed to create account", "error": str(e)}), status=500, mimetype='application/json')
 
         userId: int
         try:

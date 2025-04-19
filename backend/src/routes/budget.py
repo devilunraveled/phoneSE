@@ -4,6 +4,7 @@ from typing import Optional, List
 from src import db, PhoneSELogger
 from src.controllers import (
     budget as budgetController,
+    user as userController
     )
 from src.models import (
     Transaction,
@@ -27,17 +28,29 @@ def createBudget():
         data = request.get_json()
         if not data :
             return Response(json.dumps({"message": "Input data not provided or invalid"}), status=400, mimetype='application/json')
+        
+        userId : Optional[int]
+        try :
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to create budget: {e}")
+            return Response(json.dumps({"message": "Failed to create budget", "error": str(e)}), status=500, mimetype='application/json')
+        data['userId'] = userId
 
         budget: Optional[Budget]
+        budgetCycle: Optional[BudgetCycle]
         try:
-            budget = budgetController.createBudget(**data)
-            if budget is None:
+            budget, budgetCycle = budgetController.createBudget(**data)
+            if budget is None or budgetCycle is None:
                 raise Exception("Failed to create budget object")
         except Exception as e:
             PhoneSELogger.error(f"Failed to create budget: {e}")
             return Response(json.dumps({"message": "Failed to create budget", "error": str(e)}), status=500, mimetype='application/json')
 
         db.session.add(budget)
+        db.session.add(budgetCycle)
         db.session.commit()
 
         return Response(json.dumps({"message": "Budget created successfully"}), status=200, mimetype='application/json')
@@ -45,3 +58,30 @@ def createBudget():
         db.session.rollback()
         PhoneSELogger.error(f"Failed to create budget: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+
+@budgetBp.route('/getByUser', methods=['GET'])
+def getUserBudgets():
+    try:
+        userId: int
+        try:
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+            return Response(json.dumps({"message": "Failed to decode user token", "error": str(e)}), status=500, mimetype='application/json')
+        
+        budgets: Optional[List[Budget]]
+        try:
+            budgets = budgetController.getUserBudgets(userId)
+            if budgets is None:
+                raise Exception("Failed to get budgets by user")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get budgets by user: {e}")
+            return Response(json.dumps({"message": "Failed to get budgets by user", "error": str(e)}), status=500, mimetype='application/json')
+
+        return Response(json.dumps(budgets), status=200, mimetype='application/json')
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get budgets by user: {e}")
+        return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+

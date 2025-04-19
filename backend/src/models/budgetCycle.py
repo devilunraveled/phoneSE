@@ -21,7 +21,7 @@ class BudgetCycle(db.Model):
     amount: float
     currency: int
     startDate: datetime
-    endDate: datetime
+    duration: int
     budgetId: int
     transactions: Mapped[List[Transaction]]
 
@@ -32,16 +32,7 @@ class BudgetCycle(db.Model):
     currency = db.Column(db.Integer, nullable=False)
 
     startDate = db.Column(db.DateTime, nullable=False)
-    endDate = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
 
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
-
     transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)
-
-    def __init__(self, amount, currency, startDate, endDate, budgetId):
-        super().__init__()
-        self.amount = amount
-        self.currency = currency
-        self.startDate = startDate
-        self.endDate = endDate
-        self.budgetId = budgetId
