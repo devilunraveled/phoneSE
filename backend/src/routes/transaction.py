@@ -5,12 +5,14 @@ from src import db, PhoneSELogger
 from src.controllers import (
         transaction as transactionController,
         budget as budgetController,
-        user as userController
+        user as userController,
+        account as accountController
         )
 from src.models import (
         Transaction,
         Budget,
-        BudgetCycle
+        BudgetCycle,
+        Account
         )
 
 transactionBp = Blueprint('transaction', __name__)
@@ -38,6 +40,30 @@ def createTransaction():
         except Exception as e:
             PhoneSELogger.error(f"Failed to create transaction: {e}")
             return Response(json.dumps({"message": "Failed to create transaction", "error": str(e)}), 
+                            status=500, 
+                            mimetype='application/json')
+        
+        # Debit from payer account
+        payerAccount: Optional[Account]
+        try:
+            payerAccount = accountController.debitAccount(transaction.payer, transaction.amount, transaction.currency)
+            if payerAccount is None:
+                raise Exception("Failed to get payee account")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get payee account: {e}")
+            return Response(json.dumps({"message": "Failed to get payee account", "error": str(e)}), 
+                            status=500, 
+                            mimetype='application/json')
+        
+        # Credit to payer account
+        payeeAccount: Optional[Account]
+        try:
+            payeeAccount = accountController.creditAccount(transaction.payee, transaction.amount, transaction.currency)
+            if payeeAccount is None:
+                raise Exception("Failed to debit payee account")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to debit payee account: {e}")
+            return Response(json.dumps({"message": "Failed to debit payee account", "error": str(e)}), 
                             status=500, 
                             mimetype='application/json')
 

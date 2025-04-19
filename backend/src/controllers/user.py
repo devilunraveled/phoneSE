@@ -99,4 +99,3 @@ def getUserIdFromToken(token: str) -> Optional[int]:
     except Exception as e:
         PhoneSELogger.error(f"Failed to get user ID from token: {e}")
         return None
-
