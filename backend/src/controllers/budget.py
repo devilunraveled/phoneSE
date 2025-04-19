@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from typing import Optional
 
 from src import PhoneSELogger
+from src.utils import checkIfExpired, getStartDateOfCurrentCycle
 
 from src.models.budget import Budget
 from src.models.budgetCycle import BudgetCycle
@@ -129,13 +131,29 @@ def getBudgetTransactions( budgetId ):
 
 def getActiveBudgetCycle( budget : Budget ):
     try :
-        budget = getBudget(budget.id)
-
-        if budget is None:
-            PhoneSELogger.error("Failed to get active budget cycle: Budget does not exist")
+        # Check if the budget is still active
+        currentBudgetCycle = getBudgetCycle(budget.activeBudgetCycleId)
+        if currentBudgetCycle is None:
+            PhoneSELogger.error("Failed to get active budget cycle: No current budget cycle found")
             return None
 
-        return getBudgetCycle(budget.activeBudgetCycleId)
+        duration = currentBudgetCycle.duration
+        startDateOfBudgetCycle = currentBudgetCycle.startDate
+        
+        if checkIfExpired(startDateOfBudgetCycle, duration, datetime.now()):
+            # Budget is expired, create a new budget cycle
+            startDateOfNewBudgetCycle = getStartDateOfCurrentCycle(startDateOfBudgetCycle, duration, datetime.now() )
+
+            newBudgetCycle = createBudgetCycle(budget, startDateOfNewBudgetCycle)
+            if newBudgetCycle is None:
+                PhoneSELogger.error("Failed to get active budget cycle: Failed to create new budget cycle")
+                return None
+
+            budget.budgetCycles.append(newBudgetCycle)
+            budget.activeBudgetCycleId = newBudgetCycle.id
+            return newBudgetCycle
+
+        return currentBudgetCycle
     except Exception as e:
         PhoneSELogger.error(f"Failed to get active budget cycle: {e}")
         return None

@@ -18,20 +18,12 @@ class Budget(db.Model):
             nullable=False, 
             default=CURRENCY_LIST[0]
         ) # Suggestion for portability
-    duration = db.Column(db.String(40), nullable=True)
+    duration = db.Column(db.Integer, nullable=True)
 
     # Relationships
     budgetCycles = db.relationship('BudgetCycle', foreign_keys='budgetCycles.budgetId')
     
     activeBudgetCycleId = db.Column(db.Integer, db.ForeignKey('budgetCycles.id'), nullable=True)
-
-    def __init__(self, name, description, creationDate, userId, duration ):
-        super().__init__()
-        self.name = name
-        self.description = description
-        self.creationDate = creationDate
-        self.userId = userId
-        self.duration = duration
 
     def getDuration(self):
         if self.duration is None:

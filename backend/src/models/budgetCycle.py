@@ -32,7 +32,7 @@ class BudgetCycle(db.Model):
     currency = db.Column(db.Integer, nullable=False)
 
     startDate = db.Column(db.DateTime, nullable=False)
-    endDate = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
 
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
 
