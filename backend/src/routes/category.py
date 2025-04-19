@@ -4,6 +4,7 @@ from typing import Optional, List
 from src import db, PhoneSELogger
 from src.controllers import (
 	category as categoryController,
+	user as userController
 )
 from src.models import (
 	Category,
@@ -36,4 +37,32 @@ def createCategory():
 	except Exception as e:
 		db.session.rollback()
 		PhoneSELogger.error(f"Failed to create category: {e}")
+		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+
+@categoryBp.route('/getByUser', methods=['GET'])
+def getUserCategories():
+	try:
+		userId: int
+		try:
+			userId = userController.getUserIdFromToken(request.headers['Authorization'])
+			if userId is None:
+				raise Exception("Invalid token")
+		except Exception as e:
+			PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+			return Response(json.dumps({"message": "Failed to decode user token", "error": str(e)}), status=500, mimetype='application/json')
+		
+		categories: Optional[List[Category]]
+		try:
+			categories = categoryController.getUserCategories(userId)
+			if categories is None:
+				raise Exception("Failed to get categories object")
+		except Exception as e:
+			PhoneSELogger.error(f"Failed to get categories: {e}")
+			return Response(json.dumps({"message": "Failed to get categories", "error": str(e)}), status=500, mimetype='application/json')
+
+		response = json.jsonify(categories)
+		return response
+
+	except Exception as e:
+		PhoneSELogger.error(f"Failed to get categories: {e}")
 		return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')

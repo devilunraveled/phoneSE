@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from src import bcrypt, db, PhoneSELogger
+from src.controllers.budget import getBudget
 from src.models import User
 
 def checkIfUserExists(userId):
@@ -71,7 +72,7 @@ def validateUser(data) -> Optional[User]:
 def generateJwtToken(user: User):
     payload = {
         'iat': datetime.now(timezone.utc),
-        'user_id': str(user.id),
+        'userId': str(user.id),
         'firstName': user.firstName,
         'lastName': user.lastName,
         'phoneNumber': user.phoneNumber,
@@ -79,3 +80,41 @@ def generateJwtToken(user: User):
     }
     token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm='HS256')
     return token
+
+def decodeJwtToken(token: str):
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        PhoneSELogger.info("Decoded token.")
+        return payload
+    except jwt.ExpiredSignatureError:
+        PhoneSELogger.error("Token has expired")
+        return None
+    except jwt.InvalidTokenError:
+        PhoneSELogger.error("Invalid token")
+        return None
+
+def getUserIdFromToken(token: str) -> Optional[int]:
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+        return payload['userId']
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+        return None
+
+def getUserOverallBudget( userId : int ):
+    try :
+        user = User.query.filter_by(id=userId).first()
+        if user is None : 
+            PhoneSELogger.error("User does not exist")
+            return None
+
+        budget = getBudget(user.budgetId)
+
+        if budget is None:
+            PhoneSELogger.error("Failed to get user overall budget: Budget does not exist")
+            return None
+
+        return budget
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user overall budget: {e}")
+        return None

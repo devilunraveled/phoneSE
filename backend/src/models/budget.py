@@ -16,7 +16,10 @@ class Budget(db.Model):
     # Relationships
     budgetCycles = db.relationship('BudgetCycle')
     
+    activeBudgetCycleId = db.Column(db.Integer, db.ForeignKey('budgetCycles.id'), nullable=True)
+
     def __init__(self, name, description, creationDate, userId, duration ):
+        super().__init__()
         self.name = name
         self.description = description
         self.creationDate = creationDate

@@ -4,7 +4,7 @@ from typing import List, Optional
 from src import PhoneSELogger
 from src.models import Transaction
 from .category import getCategories
-from .account import isValidAccount
+from .account import isValidAccount, getUserAccounts
 
 # POST
 def createTransaction(data) -> Optional[Transaction]:
@@ -46,6 +46,33 @@ def getTransaction(id: int):
 		transaction: Optional[Transaction] = Transaction.query.get(id)
 		return transaction	
 	except Exception as e:
+		PhoneSELogger.error(f"Failed to get transaction: {e}")
+		return None
+
+def getTransactionsByAccount(accountId: int):
+	try:
+		transactions: Optional[List[Transaction]] = Transaction.query.filter(Transaction.payee == accountId).all()
+		return transactions
+	except Exception as e:
+		PhoneSELogger.error(f"Failed to get transactions: {e}")
+		return None
+
+def getTransactionsByUser(userId: int):
+	try:
+		transactions: List[Transaction] = []
+		accounts = getUserAccounts(userId)
+		if accounts is None:
+			return None
+		
+		for account in accounts:
+			accTransactions = getTransactionsByAccount(account.id)
+			if accTransactions is None:
+				return None
+			transactions.extend(accTransactions)
+
+		return transactions
+	except Exception as e:
+		PhoneSELogger.error(f"Failed to get transactions: {e}")
 		return None
 
 # PUT
