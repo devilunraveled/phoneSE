@@ -28,8 +28,20 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.environ.get("SQLALCHEMY_TRACK_
 # sql alchemy instance
 db = SQLAlchemy(app)
 
+# bcrypt instance for password hashing
+bcrypt = Bcrypt(app)
+
 # Flask Migrate instance to handle migrations
 migrate = Migrate(app, db)
 
 # import models to let the migrate tool know
-from src.models.user_model import User
+from src.models.user import User
+from src.models.transaction import Transaction
+from src.models.account import Account
+from src.models.budget import Budget
+from src.models.budgetCycle import BudgetCycle
+from src.models.category import Category
+
+# register the api blueprint with the application
+from src.routes import api
+app.register_blueprint(api, url_prefix='/api')
