@@ -1,3 +1,29 @@
+# Logger
+import logging
+# from logging.config import dictConfig
+
+# dictConfig({
+#     'version': 1,
+#     'formatters': {
+#         'default': {
+#             'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+#         }
+#     },
+#     'handlers': {
+#         'wsgi': {
+#             'class': 'logging.StreamHandler',
+#             'stream': 'ext://flask.logging.wsgi_errors',
+#             'formatter': 'default'
+#         }
+#     },
+#     'root': {
+#         'level': 'INFO',
+#         'handlers': ['wsgi']
+#     }
+# })
+
+PhoneSELogger = logging.getLogger(__name__)
+
 from flask import Flask
 import os
 from src.config.config import Config
@@ -45,3 +71,4 @@ from src.models.category import Category
 # register the api blueprint with the application
 from src.routes import api
 app.register_blueprint(api, url_prefix='/api')
+
