@@ -14,8 +14,15 @@ class Budget(db.Model):
     duration = db.Column(db.String(40), nullable=True)
 
     # Relationships
-    budgetCycles = db.relationship('BudgetCycle', back_populates='parentBudget')
+    budgetCycles = db.relationship('BudgetCycle')
     
+    def __init__(self, name, description, creationDate, userId, duration ):
+        self.name = name
+        self.description = description
+        self.creationDate = creationDate
+        self.userId = userId
+        self.duration = duration
+
     def getDuration(self):
         if self.duration is None:
             return "15"

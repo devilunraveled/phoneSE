@@ -262,3 +262,24 @@ def debitAccount(id: int):
     except Exception as e:
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
+
+@accountBp.route('/getUserAccounts/<int:id>', methods=['GET'])
+def getUserAccounts(id: int):
+    """
+        Returns the transactions of the account
+    """
+    try:
+        try:
+            accounts = accountController.getUserAccounts(id)
+            if accounts is None:
+                raise Exception("Failed to get account object")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get account: {e}")
+            return Response(json.dumps({"message": "Failed to get account", "error": str(e)}), status=500, mimetype='application/json')
+
+        response = json.jsonify({"accounts": accounts})
+        return response
+
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get account: {e}")
+        return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
