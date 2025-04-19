@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:phone_se_app/constants.dart' as constants;
+import 'package:phone_se_app/screens/add_account.dart';
+
+final storage = FlutterSecureStorage();
 
 class CategoryField extends StatelessWidget {
   final TextEditingController controller;
-  final String? selectedCategory;
 
-  final List<String> categories;
+  final List<DropdownMenuItem> categories;
 
-  const CategoryField({super.key, required this.controller, this.selectedCategory, required this.categories});
+  const CategoryField({super.key, required this.controller, required this.categories});
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<dynamic>(
       decoration: InputDecoration(labelText: 'Category'),
-      items: [
-        DropdownMenuItem(value: '1', child: Text(categories[0])),
-        DropdownMenuItem(value: '2', child: Text(categories[1])),
-        DropdownMenuItem(value: '3', child: Text(categories[2])),
-        DropdownMenuItem(value: '0', child: Text('Add New Category')),
-      ],
+      items: categories,
       onChanged: (value) {
-        if (value == 'Add New Category') {
+        if (value == '0') {
           // Show dialog to add new category
           showDialog(
             context: context,
@@ -49,7 +51,7 @@ class CategoryField extends StatelessWidget {
             },
           );
         } else {
-          controller.text = categories[int.parse(value!) - 1];
+          controller.text = categories[int.parse(value!) - 1].child.toString();
         }
       },
     );
@@ -58,70 +60,108 @@ class CategoryField extends StatelessWidget {
 
 class AccountField extends StatelessWidget {
   final TextEditingController controller;
-  final String? selectedAccount;
 
-  final List<String> accounts;
+  final List<DropdownMenuItem> accounts;
 
-  const AccountField({super.key, required this.controller, this.selectedAccount, required this.accounts});
+  const AccountField({super.key, required this.controller,required this.accounts});
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<dynamic>(
       decoration: InputDecoration(labelText: 'Account'),
-      items: [
-        DropdownMenuItem(value: '1', child: Text(accounts[0])),
-        DropdownMenuItem(value: '2', child: Text(accounts[1])),
-        DropdownMenuItem(value: '0', child: Text('Add New Account')),
-      ],
+      items: accounts,
       onChanged: (value) {
-        if (value == 'Add New Account') {
+        if (value == '0') {
           // Show dialog to add new account
           showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: Text('Add New Account'),
-                content: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(labelText: 'Account Name'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Add the new account logic here
-                      Navigator.pop(context);
-                    },
-                    child: Text('Add'),
-                  ),
-                ],
-              );
+              return AddAccountDialog();
             },
           );
         } else {
-          controller.text = accounts[int.parse(value!) - 1];
+          controller.text = accounts[int.parse(value!) - 1].child.toString();
         }
       },
     );
   }
 }
 
-class ExpenseLogScreen extends StatelessWidget {
+class ExpenseLogScreen extends StatefulWidget {
+  final double? amount;
+
+  const ExpenseLogScreen({super.key, this.amount});
+
+  @override
+  _ExpenseLogScreenState createState() => _ExpenseLogScreenState();
+}
+
+class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController accountController = TextEditingController();
 
-  List<String> categories = ['Food', 'Transport', 'Bills'];
-  List<String> accounts = ['Account 1', 'Account 2'];
+  List<DropdownMenuItem> categories = [];
+  List<DropdownMenuItem> accounts = [];
 
-  ExpenseLogScreen({super.key, this.amount});
+  void fetchCategories() {
+    storage.read(key: 'token').then((token) {
+      http.get(
+        Uri.parse('${constants.apiUrl}/api/getUserCategories/$token'),
+        headers: {
+          'Authorization': '$token',
+          'Content-Type': 'application/json',
+        },
+      ).then((response) {
+        if (response.statusCode == 200) {
+          final List<dynamic> data = jsonDecode(response.body)['categories'];
+          setState(() {
+            categories = data.map((category) => DropdownMenuItem(
+              value: category['id'].toString(),
+              child: Text(category['name']),
+            )).toList();
+            categories.add(DropdownMenuItem(value: '0', child: Text('Add New Category')));
+          });
+        } else {
+          print('Failed to load categories');
+        }
+      });
+    });
+  }
 
-  final String? amount;
+  void fetchAccounts() {
+    storage.read(key: 'token').then((token) {
+      http.get(
+        Uri.parse('${constants.apiUrl}/api/account/getUserAccounts/$token'),
+        headers: {
+          'Authorization': '$token',
+          'Content-Type': 'application/json',
+        },
+      ).then((response) {
+        if (response.statusCode == 200) {
+          final List<dynamic> data = jsonDecode(response.body)['accounts'];
+          setState(() {
+            accounts = data.map((account) => DropdownMenuItem(
+              value: account['id'].toString(),
+              child: Text(account['name']),
+            )).toList();
+            accounts.add(DropdownMenuItem(value: '0', child: Text('Add New Account')));
+          });
+        } else {
+          print('Failed to load accounts');
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCategories();
+    fetchAccounts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +172,7 @@ class ExpenseLogScreen extends StatelessWidget {
         child: Column(
           children: [
             TextField(
-              controller: amountController..text = amount ?? '',
+              controller: amountController..text = widget.amount?.toString() ?? '',
               decoration: InputDecoration(labelText: 'Amount'),
               keyboardType: TextInputType.number,
             ),
@@ -140,6 +180,31 @@ class ExpenseLogScreen extends StatelessWidget {
             AccountField(controller: accountController, accounts: accounts),
             ElevatedButton(
               onPressed: () {
+                storage.read(key: 'token').then((token) {
+                  http.post(
+                    Uri.parse('${constants.apiUrl}/api/expense/create/$token'),
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer $token',
+                    },
+                    body: jsonEncode({
+                      'name': nameController.text,
+                      'description': descriptionController.text,
+                      'amount': double.tryParse(amountController.text) ?? 0.0,
+                      'category_id': categoryController.text,
+                      'account_id': accountController.text,
+                    }),
+                  ).then((response) {
+                    if (response.statusCode == 200) {
+                      // Successfully logged expense
+                      print('Expense logged successfully');
+                      // Optionally, you can navigate back or show a success message
+                    } else {
+                      // Handle error
+                      print('Failed to log expense');
+                    }
+                  });
+                });
                 Navigator.pop(context);
               },
               child: Text('Save Expense'),

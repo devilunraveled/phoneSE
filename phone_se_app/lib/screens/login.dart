@@ -43,7 +43,7 @@ class LoginScreen extends StatelessWidget {
                   if (response.statusCode == 200) {
                     // Parse the response body
                     final Map<String, dynamic> responseBody = json.decode(response.body);
-                    token = responseBody['token'];
+                    token = responseBody['token'].toString();
                     // Save the token in shared preferences or any other storage
                     storage.write(key: 'token', value: token);
                     // Navigate to the dashboard screen
@@ -58,7 +58,7 @@ class LoginScreen extends StatelessWidget {
               child: Text('Login'),
             ),
             TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen())),
+              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SignupScreen())),
               child: Text("Don't have an account? Sign up"),
             )
           ],
