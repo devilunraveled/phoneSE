@@ -39,6 +39,5 @@ class BudgetCycle(db.Model):
     endDate = db.Column(db.DateTime, nullable=False)
 
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
-    parentBudget = db.relationship('Budget', back_populates='budgetCycles')
 
     transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)
