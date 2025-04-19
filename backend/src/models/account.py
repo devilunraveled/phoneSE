@@ -34,10 +34,5 @@ class Account(db.Model):
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=True)
     description = db.Column(db.String(100), nullable=True)
 
-    def __init__(self, name, userId ):
-        super().__init__()
-        self.name = name
-        self.userId = userId
-
     def __repr__(self):
         return '<%r Account>' % self.name

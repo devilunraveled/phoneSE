@@ -15,8 +15,8 @@ from src.models import (
 accountBp = Blueprint('account', __name__)
 
 # POST
-@accountBp.route('/create/<int:id>', methods=['POST'])
-def createAccount(id: int):
+@accountBp.route('/create', methods=['POST'])
+def createAccount():
     """
     1. Create account object with the details provided in request.
     2. Add the account to the database.
@@ -29,9 +29,19 @@ def createAccount(id: int):
         if not data:
             return Response(json.dumps({"message": "Input data not provided or invalid"}), status=400, mimetype='application/json')
 
+        userId: int
+        try:
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+            return Response(json.dumps({"message": "Failed to decode user token", "error": str(e)}), status=500, mimetype='application/json')
+        
+        data['userId'] = userId
         account: Optional[Account]
         try:
-            account = accountController.createAccount(id, **data)
+            account = accountController.createAccount(**data)
             if account is None:
                 raise Exception("Failed to create account object")
         except Exception as e:
@@ -263,14 +273,22 @@ def debitAccount(id: int):
         PhoneSELogger.error(f"Failed to update account: {e}")
         return Response(json.dumps({"message": "Internal server error", "error": str(e)}), status=500, mimetype='application/json')
 
-@accountBp.route('/getUserAccounts/<int:id>', methods=['GET'])
-def getUserAccounts(id: int):
+@accountBp.route('/getUserAccounts', methods=['GET'])
+def getUserAccounts():
     """
         Returns the transactions of the account
     """
     try:
+        userId: int
         try:
-            accounts = accountController.getUserAccounts(id)
+            userId = userController.getUserIdFromToken(request.headers['Authorization'])
+            if userId is None:
+                raise Exception("Invalid token")
+        except Exception as e:
+            PhoneSELogger.error(f"Failed to get user ID from token: {e}")
+            return Response(json.dumps({"message": "Failed to decode user token", "error": str(e)}), status=500, mimetype='application/json')
+        try:
+            accounts = accountController.getUserAccounts(userId)
             if accounts is None:
                 raise Exception("Failed to get account object")
         except Exception as e:

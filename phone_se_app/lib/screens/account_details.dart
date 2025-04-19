@@ -62,7 +62,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   void fetchTransactions() {
     storage.read(key: 'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/getAccountTransactions/${widget.accountId}/$token'),
+        Uri.parse('${constants.apiUrl}/api/getAccountTransactions/${widget.accountId}'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',

@@ -4,21 +4,44 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:phone_se_app/constants.dart' as constants;
+import 'package:phone_se_app/screens/add_category.dart';
 
 final storage = FlutterSecureStorage();
 
 class CategoryItem {
+  final int id;
   final String name;
-  final String budgetName;
-  final String amount;
+  final String description;
 
-  CategoryItem({required this.name, required this.budgetName, required this.amount});
+  CategoryItem({required this.id, required this.name, required this.description});
 
   Widget buildCategoryItem() {
     return Card(
       child: ListTile(
         title: Text(name),
-        subtitle: Text('Budget: $budgetName\nAmount: $amount'),
+        subtitle: Text(description),
+      ),
+    );
+  }
+}
+
+class AddCategoryItem {
+  Widget buildAddCategoryItem(BuildContext context, Function updateCategories) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          // Show dialog to add new category
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AddCategoryDialog(updateCategories: updateCategories);
+            },
+          );
+        },
+        child: ListTile(
+          title: Text('Add Category'),
+          subtitle: Text('Click to add a new category'),
+        ),
       ),
     );
   }
@@ -37,19 +60,19 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void updateCategories() {
     storage.read(key:'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/category/get/$token'),
+        Uri.parse('${constants.apiUrl}/api/category/getByUser'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',
         },
       ).then((response) {
         if (response.statusCode == 200) {
-          final List<dynamic> data = jsonDecode(response.body)['categories'];
+          final List<dynamic> data = jsonDecode(response.body);
           setState(() {
             categories = data.map((category) => CategoryItem(
+              id: category['id'],
               name: category['name'],
-              budgetName: category['budget_name'],
-              amount: category['amount'].toString(),
+              description: category['description'],
             )).toList();
           });
         } else {
@@ -57,6 +80,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         }
       });
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateCategories();
   }
 
   @override
@@ -71,8 +100,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: categories.length,
+                itemCount: categories.length + 1,
                 itemBuilder: (context, index) {
+                  if (index == categories.length) {
+                    return AddCategoryItem().buildAddCategoryItem(context, updateCategories);
+                  }
                   return categories[index].buildCategoryItem();
                 },
               ),

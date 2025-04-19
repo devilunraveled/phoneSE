@@ -34,7 +34,7 @@ def registerUser():
 
 		response = json.dumps({
 			"message": "User registered successfully",
-			"token": newUser.id,
+			"token": token,
 		})
 
 		db.session.commit()
@@ -68,7 +68,7 @@ def loginUser():
 
 		response = json.dumps({
 			"message": "Login successful",
-			"token": user.id,
+			"token": token,
 		})
 
 		return Response(response, status=200, mimetype='application/json')
