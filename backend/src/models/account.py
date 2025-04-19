@@ -13,7 +13,7 @@ class Account(db.Model):
     userId : int
     balance : float
     currency : str
-    budget : int
+    budgetId : int
     description : str
 
     __tablename__ = 'accounts'
@@ -35,6 +35,7 @@ class Account(db.Model):
     description = db.Column(db.String(100), nullable=True)
 
     def __init__(self, name, userId ):
+        super().__init__()
         self.name = name
         self.userId = userId
 

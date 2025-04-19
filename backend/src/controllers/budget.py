@@ -1,12 +1,12 @@
-from typing import Any, Optional
+from typing import Optional
 
 from src import PhoneSELogger
 
 from src.models.budget import Budget
 from src.models.budgetCycle import BudgetCycle
-from src.models.transaction import Transaction
 from src.models.category import Category
 from src.models.account import Account
+from src.models.user import User
 
 from src.controllers.user import checkIfUserExists
 from src.controllers.budgetCycle import createBudgetCycle, getBudgetCycleTransactions, getBudgetCycle
@@ -157,4 +157,22 @@ def getBudgetAccounts( budgetId ):
         return accounts
     except Exception as e:
         PhoneSELogger.error(f"Failed to get budget accounts: {e}")
+        return None
+
+def getUserOverallBudget( userId : int ):
+    try :
+        user = User.query.filter_by(id=userId).first()
+        if user is None : 
+            PhoneSELogger.error("User does not exist")
+            return None
+
+        budget = getBudget(user.budgetId)
+
+        if budget is None:
+            PhoneSELogger.error("Failed to get user overall budget: Budget does not exist")
+            return None
+
+        return budget
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user overall budget: {e}")
         return None

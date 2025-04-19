@@ -101,20 +101,3 @@ def getUserIdFromToken(token: str) -> Optional[int]:
         PhoneSELogger.error(f"Failed to get user ID from token: {e}")
         return None
 
-def getUserOverallBudget( userId : int ):
-    try :
-        user = User.query.filter_by(id=userId).first()
-        if user is None : 
-            PhoneSELogger.error("User does not exist")
-            return None
-
-        budget = getBudget(user.budgetId)
-
-        if budget is None:
-            PhoneSELogger.error("Failed to get user overall budget: Budget does not exist")
-            return None
-
-        return budget
-    except Exception as e:
-        PhoneSELogger.error(f"Failed to get user overall budget: {e}")
-        return None
