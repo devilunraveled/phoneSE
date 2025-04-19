@@ -1,4 +1,5 @@
 from src import db
+from src.constants import CURRENCY_LIST
 
 class Budget(db.Model):
     __tablename__ = 'budgets'
@@ -11,6 +12,12 @@ class Budget(db.Model):
     userId = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     # Nullable Fields
+    amount = db.Column(db.Float, nullable=True, default=0.0)
+    currency = db.Column(
+            db.Enum(*CURRENCY_LIST, name = 'currency_enum', native_enum=False), 
+            nullable=False, 
+            default=CURRENCY_LIST[0]
+        ) # Suggestion for portability
     duration = db.Column(db.String(40), nullable=True)
 
     # Relationships

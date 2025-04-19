@@ -18,8 +18,6 @@ transactionBudgetCycleAssociation = Table(
 @dataclass
 class BudgetCycle(db.Model):
     id: int
-    name: str
-    description: str
     amount: float
     currency: int
     startDate: datetime
@@ -30,8 +28,6 @@ class BudgetCycle(db.Model):
     __tablename__ = 'budgetCycles'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    name = db.Column(db.String(40), nullable=False)
-    description = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     currency = db.Column(db.Integer, nullable=False)
 
@@ -41,3 +37,11 @@ class BudgetCycle(db.Model):
     budgetId = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
 
     transactions = db.relationship('BudgetCycle', secondary=transactionBudgetCycleAssociation)
+
+    def __init__(self, amount, currency, startDate, endDate, budgetId):
+        super().__init__()
+        self.amount = amount
+        self.currency = currency
+        self.startDate = startDate
+        self.endDate = endDate
+        self.budgetId = budgetId
