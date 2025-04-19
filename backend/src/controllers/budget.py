@@ -158,3 +158,15 @@ def getBudgetAccounts( budgetId ):
     except Exception as e:
         PhoneSELogger.error(f"Failed to get budget accounts: {e}")
         return None
+
+def getUserBudgets( userId : int ):
+    try :
+        budgets = Budget.query.filter(Budget.userId == userId).all()
+        if budgets is None or any(budget is None for budget in budgets):
+            PhoneSELogger.error("Failed to get user budgets: No budgets found")
+            return None
+
+        return budgets
+    except Exception as e:
+        PhoneSELogger.error(f"Failed to get user overall budget: {e}")
+        return None
