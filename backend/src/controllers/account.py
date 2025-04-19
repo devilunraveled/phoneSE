@@ -270,3 +270,10 @@ def deleteAccount( accountId ):
     except Exception as e:
         PhoneSELogger.error( "Account deletion failed: " + str(e) )
         return None
+
+def getUserAccounts( userId ) -> Optional[list[Account]]:
+    try :
+        return Account.query.filter_by( userId = userId ).all()
+    except Exception as e:
+        PhoneSELogger.error( "Account fetch failed: " + str(e) )
+        return None
