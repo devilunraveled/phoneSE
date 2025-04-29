@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:phone_se_app/screens/add_account.dart';
+import 'package:phone_se_app/screens/account/add_account.dart';
 import 'package:phone_se_app/constants.dart' as constants;
 
 final storage = FlutterSecureStorage();

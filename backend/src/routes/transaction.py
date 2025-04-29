@@ -48,10 +48,10 @@ def createTransaction():
         try:
             payerAccount = accountController.debitAccount(transaction.payer, transaction.amount, transaction.currency)
             if payerAccount is None:
-                raise Exception("Failed to get payee account")
+                raise Exception("Failed to get payer account")
         except Exception as e:
-            PhoneSELogger.error(f"Failed to get payee account: {e}")
-            return Response(json.dumps({"message": "Failed to get payee account", "error": str(e)}), 
+            PhoneSELogger.error(f"Failed to get payer account: {e}")
+            return Response(json.dumps({"message": "Failed to get payer account", "error": str(e)}), 
                             status=500, 
                             mimetype='application/json')
         

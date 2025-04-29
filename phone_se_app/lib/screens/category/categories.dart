@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:phone_se_app/constants.dart' as constants;
-import 'package:phone_se_app/screens/add_category.dart';
+import 'package:phone_se_app/screens/category/add_category.dart';
 
 final storage = FlutterSecureStorage();
 

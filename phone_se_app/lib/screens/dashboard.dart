@@ -5,8 +5,8 @@ import 'package:phone_se_app/screens/expense_log.dart';
 import 'package:phone_se_app/screens/payment.dart';
 import 'package:phone_se_app/screens/qr_scan.dart';
 import 'package:phone_se_app/screens/budgets.dart';
-import 'package:phone_se_app/screens/accounts.dart';
-import 'package:phone_se_app/screens/categories.dart';
+import 'package:phone_se_app/screens/account/accounts.dart';
+import 'package:phone_se_app/screens/category/categories.dart';
 
 class SpendingChart extends StatelessWidget {
   const SpendingChart({super.key});
