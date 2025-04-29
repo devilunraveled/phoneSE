@@ -108,7 +108,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         },
       ).then((response) {
         if (response.statusCode == 200) {
-          final List<dynamic> data = jsonDecode(response.body);
+          final List<dynamic> data = jsonDecode(response.body)['categories'];
           setState(() {
             categories = data.map((category) => DropdownMenuItem(
               value: category['id'].toString(),
@@ -126,7 +126,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   void fetchAccounts() {
     storage.read(key: 'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/account/getUserAccounts'),
+        Uri.parse('${constants.apiUrl}/api/account/getByUser'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',

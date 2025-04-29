@@ -67,7 +67,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         },
       ).then((response) {
         if (response.statusCode == 200) {
-          final List<dynamic> data = jsonDecode(response.body);
+          final List<dynamic> data = jsonDecode(response.body)['categories'];
           setState(() {
             categories = data.map((category) => CategoryItem(
               id: category['id'],

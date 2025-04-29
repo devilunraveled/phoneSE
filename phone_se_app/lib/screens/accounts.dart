@@ -66,7 +66,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
   void updateAccounts() {
     storage.read(key: 'token').then((token) {
-      http.get(Uri.parse('${constants.apiUrl}/api/account/getUserAccounts'),
+      http.get(Uri.parse('${constants.apiUrl}/api/account/getByUser'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',

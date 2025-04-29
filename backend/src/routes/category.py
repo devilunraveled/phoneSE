@@ -70,7 +70,7 @@ def getUserCategories():
 			PhoneSELogger.error(f"Failed to get categories: {e}")
 			return Response(json.dumps({"message": "Failed to get categories", "error": str(e)}), status=500, mimetype='application/json')
 
-		response = json.jsonify(categories)
+		response = json.jsonify({"categories": categories})
 		return response
 
 	except Exception as e:
