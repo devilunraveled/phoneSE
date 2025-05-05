@@ -183,7 +183,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
               decoration: InputDecoration(labelText: 'Description'),
             ),
             TextField(
-              controller: amountController..text = widget.amount?.toString() ?? '',
+              controller: amountController..text = widget.amount?.toString() ?? amountController.text,
               decoration: InputDecoration(labelText: 'Amount'),
               keyboardType: TextInputType.number,
             ),

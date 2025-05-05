@@ -4,7 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:phone_se_app/screens/expense_log.dart';
 import 'package:phone_se_app/screens/payment.dart';
 import 'package:phone_se_app/screens/qr_scan.dart';
-import 'package:phone_se_app/screens/budgets.dart';
+import 'package:phone_se_app/screens/budget/budgets.dart';
 import 'package:phone_se_app/screens/account/accounts.dart';
 import 'package:phone_se_app/screens/category/categories.dart';
 

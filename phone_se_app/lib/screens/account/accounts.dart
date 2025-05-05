@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:phone_se_app/screens/account/add_account.dart';
+import 'package:phone_se_app/screens/account/account_details.dart';
 import 'package:phone_se_app/constants.dart' as constants;
 
 final storage = FlutterSecureStorage();
@@ -21,7 +22,20 @@ class AccountItem {
       child: InkWell(
         onTap: () {
           // Navigate to account details screen
-          print('Navigate to account details screen for account ID: $id');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AccountDetailsScreen(
+                accountId: id,
+                accountName: name,
+                accountBalance: balance,
+                accountCurrency: currency,
+              ),
+            ),
+          ).then((_) {
+            // Refresh accounts after returning from details screen
+            updateAccounts();
+          });
         },
         child: ListTile(
           title: Text(name),

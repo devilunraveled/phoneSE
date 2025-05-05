@@ -9,20 +9,16 @@ final storage = FlutterSecureStorage();
 
 class TransactionItem {
   final int id;
-  final String date;
   final String name;
   final String description;
-  final String sign;
   final double amount;
   final String currency;
   final String timestamp;
 
   TransactionItem({
     required this.id,
-    required this.date,
     required this.name,
     required this.description,
-    required this.sign,
     required this.amount,
     required this.currency,
     required this.timestamp,
@@ -32,7 +28,7 @@ class TransactionItem {
       child: ListTile(
         title: Text('$name - $timestamp'),
         subtitle: Text(description),
-        trailing: Text('$sign $amount $currency'),
+        trailing: Text('$amount $currency'),
       ),
     );
   }
@@ -62,7 +58,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   void fetchTransactions() {
     storage.read(key: 'token').then((token) {
       http.get(
-        Uri.parse('${constants.apiUrl}/api/getAccountTransactions/${widget.accountId}'),
+        Uri.parse('${constants.apiUrl}/api/transaction/getByAccount/${widget.accountId}'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',
@@ -74,10 +70,8 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
             transactions = data.map((item) {
               return TransactionItem(
                 id: item['id'],
-                date: item['date'],
                 name: item['name'],
                 description: item['description'],
-                sign: (item['payer'] == widget.accountId) ? '-' : '',
                 amount: item['amount'],
                 currency: item['currency'],
                 timestamp: item['timestamp'],
@@ -108,8 +102,8 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text('Account Name: ${widget.accountName}'),
-            Text('Balance: ${widget.accountBalance} ${widget.accountCurrency}'),
+            Text('Account Name: ${widget.accountName}', style: TextStyle(fontSize: 20)),
+            Text('Balance: ${widget.accountBalance} ${widget.accountCurrency}', style: TextStyle(fontSize: 20)),
             SizedBox(height: 20),
             Text('Transactions:', style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
